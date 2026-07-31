@@ -1294,13 +1294,18 @@
           // 1. Find all subfolders inside the Master Folder
           const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${MASTER_FOLDER_ID}'+in+parents+and+mimeType='application/vnd.google-apps.folder'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
           const folderRes = await fetch(foldersUrl);
-          const folderData = await folderRes.json();
+         const folderData = await folderRes.json();
 
-          if (!folderData.files || folderData.files.length === 0) {
-            dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No projects found in the master folder. Please add subfolders to Google Drive.</p>";
-            return;
-          }
+// THIS WILL REVEAL THE TRUE ERROR:
+if (folderData.error) {
+  dynamicGallery.innerHTML = `<p style='color: red; text-align: center; width: 100%;'>Google Drive Error: ${folderData.error.message}</p>`;
+  return;
+}
 
+if (!folderData.files || folderData.files.length === 0) {
+  dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No projects found in the master folder. Please add subfolders to Google Drive.</p>";
+  return;
+}
           dynamicGallery.innerHTML = ""; // Clear the "Loading..." text
 
           // 2. Loop through each folder to build a card
