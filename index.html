@@ -600,7 +600,7 @@
       font-weight: 700;
     }
 
-    /* --- GALLERY SECTION --- */
+    /* --- GALLERY SECTION (AUTOMATED CONTAINER) --- */
     .projects-section {
       padding: 4.5rem 8%;
       border-top: 1px solid var(--border-color);
@@ -661,6 +661,9 @@
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .project-img-container img {
@@ -988,7 +991,7 @@
       <div class="modal-header">
         <div class="modal-title-area">
           <span id="modalMeta">@anilkrishna · Architecture</span>
-          <h3 id="modalTitle">Monolithic Concrete Villa</h3>
+          <h3 id="modalTitle">Project Title</h3>
         </div>
         <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
       </div>
@@ -1208,7 +1211,7 @@
     </div>
   </section>
 
-  <!-- GALLERY SECTION (INTERACTIVE STACKED MODAL TRIGGERS) -->
+  <!-- GALLERY SECTION (AUTOMATED INJECTION) -->
   <section class="projects-section" id="gallery">
     <div class="section-header">
       <div>
@@ -1217,47 +1220,9 @@
       </div>
     </div>
 
-    <div class="projects-grid">
-     <!-- Card 1: Project 1 -->
-<div class="project-card" data-project="project1">
-  <div class="project-img-container">
-    <img src="https://lh3.googleusercontent.com/d/1LgL6EWyVQxFQi170kFz6fnPKqlGGtzBm" alt="Monolithic Concrete Villa" loading="lazy" />
-  </div>
-  <div class="project-info">
-    <div>
-      <span class="project-meta">@anilkrishna · Architecture</span>
-      <h3 class="project-title">Monolithic Concrete Villa</h3>
-    </div>
-    <span class="project-link">View Project →</span>
-  </div>
-</div>
-      <!-- Card 2: Project 2 -->
-      <div class="project-card" data-project="project2">
-        <div class="project-img-container">
-          <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80" alt="Minimalist Travertine Residence" loading="lazy" />
-        </div>
-        <div class="project-info">
-          <div>
-            <span class="project-meta">@anilkrishna · Interior</span>
-            <h3 class="project-title">Minimalist Travertine Residence</h3>
-          </div>
-          <span class="project-link">View Project →</span>
-        </div>
-      </div>
-
-      <!-- Card 3: Project 3 -->
-      <div class="project-card" data-project="project3">
-        <div class="project-img-container">
-          <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80" alt="Glass & Steel Pavilion" loading="lazy" />
-        </div>
-        <div class="project-info">
-          <div>
-            <span class="project-meta">@anilkrishna · Spatial Design</span>
-            <h3 class="project-title">Glass & Steel Pavilion</h3>
-          </div>
-          <span class="project-link">View Project →</span>
-        </div>
-      </div>
+    <!-- The Javascript will automatically inject the cards into this empty div -->
+    <div class="projects-grid" id="dynamicGallery">
+      <p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;">Loading live projects from Google Drive...</p>
     </div>
   </section>
 
@@ -1308,61 +1273,97 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
-      // 1. GOOGLE DRIVE API INTEGRATION
+      // 1. AUTOMATED GOOGLE DRIVE ENGINE
       // ==========================================
       const GOOGLE_API_KEY = "AIzaSyCoCi9AP9P4eyuXN3SwykQmJRl1TK8VsTo";
+      
+      // MASTER "WEBSITE GALLERY" FOLDER ID:
+      const MASTER_FOLDER_ID = "1DrIGGzMYHn0X90pXIkua8PjbaH1UF_uk"; 
 
-      const projectsData = {
-        project1: {
-          title: "Monolithic Concrete Villa",
-          meta: "@anilkrishna · Architecture",
-          description: "Full architectural interior & spatial geometry execution. Rendered using 3ds Max, V-Ray, and Corona with accurate factory cut-list drawings.",
-          folderId: "1cPyMlmKwd9Ou_Wk1AtmrjicI7JVNHdcu" 
-        },
-        project2: {
-          title: "Minimalist Travertine Residence",
-          meta: "@anilkrishna · Interior",
-          description: "Residential interior design emphasizing travertine stone palettes, subtle natural lighting strategies, and custom parametric furniture modeling.",
-          folderId: "PASTE_PROJECT_2_FOLDER_ID_HERE"
-        },
-        project3: {
-          title: "Glass & Steel Pavilion",
-          meta: "@anilkrishna · Spatial Design",
-          description: "Commercial architectural visualization showcasing structural glass, steel framing, and immersive landscape integration created with Lumion and AutoCAD.",
-          folderId: "PASTE_PROJECT_3_FOLDER_ID_HERE"
-        }
-      };
-
-      // ==========================================
-      // 2. MODAL WINDOW & LIVE GALLERY LOGIC
-      // ==========================================
+      const dynamicGallery = document.getElementById("dynamicGallery");
       const projectModal = document.getElementById("projectModal");
       const closeModalBtn = document.getElementById("closeModalBtn");
       const modalTitle = document.getElementById("modalTitle");
       const modalMeta = document.getElementById("modalMeta");
       const modalDescription = document.getElementById("modalDescription");
       const modalGallery = document.getElementById("modalGallery");
-      const projectCards = document.querySelectorAll(".project-card");
 
-      async function openModal(projectKey) {
-        const data = projectsData[projectKey];
-        if (!data) return;
+      // Initialize the automated gallery on page load
+      async function buildGallery() {
+        try {
+          // 1. Find all subfolders inside the Master Folder
+          const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${MASTER_FOLDER_ID}'+in+parents+and+mimeType='application/vnd.google-apps.folder'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
+          const folderRes = await fetch(foldersUrl);
+          const folderData = await folderRes.json();
 
-        modalTitle.textContent = data.title;
-        modalMeta.textContent = data.meta;
-        modalDescription.textContent = "Loading live images..."; 
+          if (!folderData.files || folderData.files.length === 0) {
+            dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No projects found in the master folder. Please add subfolders to Google Drive.</p>";
+            return;
+          }
+
+          dynamicGallery.innerHTML = ""; // Clear the "Loading..." text
+
+          // 2. Loop through each folder to build a card
+          for (const folder of folderData.files) {
+            
+            // Ask Google Drive for just ONE image from this folder to use as the cover
+            const coverUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'&fields=files(id)&pageSize=1&key=${GOOGLE_API_KEY}`;
+            const coverRes = await fetch(coverUrl);
+            const coverData = await coverRes.json();
+            
+            let coverImgLink = ""; // Fallback if folder is empty
+            if (coverData.files && coverData.files.length > 0) {
+              coverImgLink = `https://lh3.googleusercontent.com/d/${coverData.files[0].id}`;
+            }
+
+            // 3. Construct the HTML card
+            const card = document.createElement("div");
+            card.className = "project-card";
+            
+            // When card is clicked, pass the Folder ID and Folder Name to the modal
+            card.onclick = () => openModal(folder.id, folder.name);
+
+            card.innerHTML = `
+              <div class="project-img-container">
+                <img src="${coverImgLink}" alt="${folder.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; this.style.opacity='0.5';"/>
+              </div>
+              <div class="project-info">
+                <div>
+                  <span class="project-meta">@anilkrishna · Architecture</span>
+                  <h3 class="project-title">${folder.name}</h3>
+                </div>
+                <span class="project-link">View Project →</span>
+              </div>
+            `;
+            
+            dynamicGallery.appendChild(card);
+            
+            // Re-apply hover listeners for custom cursor on the newly generated cards
+            card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+            card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+          }
+        } catch (error) {
+          console.error("Error building gallery:", error);
+          dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>Error connecting to Google Drive. Check permissions and API Key.</p>";
+        }
+      }
+
+      // Open the modal and fetch all images for the clicked folder
+      async function openModal(folderId, folderName) {
+        modalTitle.textContent = folderName;
+        modalMeta.textContent = "@anilkrishna · Architecture";
+        modalDescription.textContent = "Loading live images from " + folderName + "..."; 
         modalGallery.innerHTML = "";
 
         projectModal.classList.add("active");
         document.body.classList.add("modal-open");
 
         try {
-          const fetchUrl = `https://www.googleapis.com/drive/v3/files?q='${data.folderId}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
-          
+          const fetchUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
           const response = await fetch(fetchUrl);
           const driveData = await response.json();
 
-          modalDescription.textContent = data.description; 
+          modalDescription.textContent = "Full architectural execution and spatial geometry mapping."; 
 
           if (driveData.files && driveData.files.length > 0) {
             driveData.files.forEach(file => {
@@ -1373,11 +1374,11 @@
               modalGallery.appendChild(img);
             });
           } else {
-            modalGallery.innerHTML = "<p style='color:var(--text-muted)'>No images found in this folder. Make sure the folder is public.</p>";
+            modalGallery.innerHTML = "<p style='color: var(--text-muted);'>No images found in this project folder.</p>";
           }
         } catch (error) {
           console.error("Error loading images:", error);
-          modalDescription.textContent = "Failed to load images from Google Drive. Please check your API key and Folder ID.";
+          modalDescription.textContent = "Failed to load images from Google Drive.";
         }
       }
 
@@ -1386,31 +1387,23 @@
         document.body.classList.remove("modal-open");
       }
 
-      projectCards.forEach(card => {
-        card.addEventListener("click", () => {
-          const projectKey = card.getAttribute("data-project");
-          openModal(projectKey);
-        });
-      });
-
       closeModalBtn.addEventListener("click", closeModal);
-
+      
       // Close modal on outside background click
-      projectModal.addEventListener("click", (e) => {
-        if (e.target === projectModal) {
-          closeModal();
-        }
+      projectModal.addEventListener("click", (e) => { 
+        if (e.target === projectModal) closeModal(); 
+      });
+      
+      // Close modal on Escape key press
+      document.addEventListener("keydown", (e) => { 
+        if (e.key === "Escape" && projectModal.classList.contains("active")) closeModal(); 
       });
 
-      // Close modal on Escape key press
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && projectModal.classList.contains("active")) {
-          closeModal();
-        }
-      });
+      // Trigger the automation when the page loads
+      buildGallery();
 
       // ==========================================
-      // 3. NAVIGATION LOGIC
+      // 2. NAVIGATION LOGIC
       // ==========================================
       const navLinks = document.querySelectorAll(".nav-capsule-links .nav-link");
       const activePill = document.getElementById("activePill");
@@ -1510,7 +1503,7 @@
       });
 
       // ==========================================
-      // 4. SOLID BLACK DOT CURSOR & SMOKE TRAIL LOGIC
+      // 3. SOLID BLACK DOT CURSOR & SMOKE TRAIL LOGIC
       // ==========================================
       const cursorDot = document.getElementById("cursorDot");
       let lastSmokeTime = 0;
@@ -1540,7 +1533,7 @@
       }
 
       // Add hover scale class on links & interactive elements
-      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .project-card, .modal-close-btn");
+      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .modal-close-btn");
       interactiveElements.forEach(elem => {
         elem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
         elem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
