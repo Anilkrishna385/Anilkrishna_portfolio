@@ -45,7 +45,7 @@
 
     /* Hide default mouse cursor on desktop to use custom black dot */
     @media (pointer: fine) {
-      body, a, button, .exp-card, .software-item, .project-card {
+      body, a, button, .exp-card, .software-item, .project-card, .modal-close-btn {
         cursor: none !important;
       }
     }
@@ -56,6 +56,11 @@
       font-family: var(--font-body);
       line-height: 1.6;
       overflow-x: hidden;
+    }
+
+    /* Prevent body scroll when modal is open */
+    body.modal-open {
+      overflow: hidden;
     }
 
     a {
@@ -483,7 +488,6 @@
       overflow: hidden;
     }
 
-    /* Current Role Badge Highlight */
     .current-role-badge {
       display: inline-block;
       align-self: flex-start;
@@ -643,6 +647,7 @@
       flex-direction: column;
       box-shadow: var(--card-shadow);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
     }
 
     .project-card:hover {
@@ -705,8 +710,134 @@
       transition: opacity 0.3s ease;
     }
 
-    .project-link:hover {
+    .project-card:hover .project-link {
       opacity: 0.6;
+    }
+
+    /* --- FULL-SCREEN STACKED PROJECT MODAL OVERLAY --- */
+    .project-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(17, 17, 17, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      padding: 3rem 5%;
+    }
+
+    .project-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .project-modal-content {
+      background: var(--bg-main);
+      border-radius: var(--radius-lg);
+      max-width: 1000px;
+      width: 100%;
+      margin: auto 0;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+      transform: translateY(30px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .project-modal-overlay.active .project-modal-content {
+      transform: translateY(0);
+    }
+
+    /* Modal Sticky Header */
+    .modal-header {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 1.4rem 2.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .modal-title-area h3 {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .modal-title-area span {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .modal-close-btn {
+      background: #f0f0f0;
+      border: 1px solid var(--border-color);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      transition: all 0.3s ease;
+      line-height: 1;
+    }
+
+    .modal-close-btn:hover {
+      background: var(--text-main);
+      color: #ffffff;
+      transform: rotate(90deg);
+    }
+
+    /* Modal Body: Stacked Editorial Images */
+    .modal-body {
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    .modal-description {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .modal-stacked-gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .modal-stacked-gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      object-fit: cover;
     }
 
     /* --- FOOTER: UPGRADED TO CONTACT DETAILS WITH ICON CAPSULES --- */
@@ -737,7 +868,6 @@
       gap: 1rem;
     }
 
-    /* Icon Capsule Styling */
     .contact-capsule {
       padding: 0.75rem 1.6rem;
       border: 1.5px solid var(--border-color);
@@ -803,7 +933,6 @@
         min-height: auto;
       }
 
-      /* HIDE CIRCULAR IMAGE ON MOBILE VIEW, KEEP DESCRIPTION VISIBLE */
       .hero-image-wrapper {
         display: none;
       }
@@ -836,6 +965,15 @@
       .experience-section, .software-section, .projects-section, footer {
         padding: 3.5rem 5% 3rem;
       }
+
+      .modal-header {
+        padding: 1.2rem 1.5rem;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        gap: 1.5rem;
+      }
     }
   </style>
 </head>
@@ -843,6 +981,25 @@
 
   <!-- SOLID BLACK DOT CURSOR ELEMENT -->
   <div id="cursorDot" aria-hidden="true"></div>
+
+  <!-- FULL-SCREEN PROJECT MODAL WITH EDITORIAL STACKED IMAGES -->
+  <div class="project-modal-overlay" id="projectModal">
+    <div class="project-modal-content">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <span id="modalMeta">@anilkrishna · Architecture</span>
+          <h3 id="modalTitle">Monolithic Concrete Villa</h3>
+        </div>
+        <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-description" id="modalDescription"></p>
+        <div class="modal-stacked-gallery" id="modalGallery">
+          <!-- Dynamically populated with Google Drive images -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- STICKY FLUTED GLASS HEADER -->
   <header class="header-wrapper">
@@ -893,7 +1050,7 @@
     </div>
   </section>
 
-  <!-- PREMIUM TECHNICAL STACK (DIRECT GOOGLE DRIVE CONTENT LINKS) -->
+  <!-- PREMIUM TECHNICAL STACK -->
   <section class="software-section" id="software">
     <span class="section-label">Technical Proficiency</span>
     <h2 class="software-header">Using Softwares</h2>
@@ -1011,8 +1168,8 @@
         </div>
         <div class="exp-divider"></div>
         <ul class="exp-bullets">
-          <li>Assisted with customer requests and answered questions to improve satisfaction[cite: 1]. Provided excellent service and attention to customers when face-to-face or through phone conversations[cite: 1].</li>
-          <li>Identified needs of customers promptly and efficiently[cite: 1].</li>
+          <li>Assisted with customer requests and answered questions to improve satisfaction. Provided excellent service and attention to customers when face-to-face or through phone conversations.</li>
+          <li>Identified needs of customers promptly and efficiently.</li>
         </ul>
       </div>
 
@@ -1027,9 +1184,9 @@
         </div>
         <div class="exp-divider"></div>
         <ul class="exp-bullets">
-          <li>Managed multiple projects simultaneously while meeting tight deadlines set by clients[cite: 1].</li>
-          <li>Collaborated closely with customers, adjusting plans to satisfy client needs and requirements[cite: 1].</li>
-          <li>Used natural and artificial lighting strategies to highlight features and areas of rooms[cite: 1].</li>
+          <li>Managed multiple projects simultaneously while meeting tight deadlines set by clients.</li>
+          <li>Collaborated closely with customers, adjusting plans to satisfy client needs and requirements.</li>
+          <li>Used natural and artificial lighting strategies to highlight features and areas of rooms.</li>
         </ul>
       </div>
 
@@ -1044,14 +1201,14 @@
         </div>
         <div class="exp-divider"></div>
         <ul class="exp-bullets">
-          <li>Prepared quantity BOQ[cite: 1]. Drawings for cutlist[cite: 1].</li>
-          <li>Created 2D drawings for production[cite: 1].</li>
+          <li>Prepared quantity BOQ. Drawings for cutlist.</li>
+          <li>Created 2D drawings for production.</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <!-- GALLERY SECTION -->
+  <!-- GALLERY SECTION (INTERACTIVE STACKED MODAL TRIGGERS) -->
   <section class="projects-section" id="gallery">
     <div class="section-header">
       <div>
@@ -1061,8 +1218,8 @@
     </div>
 
     <div class="projects-grid">
-      <!-- Card 1 -->
-      <div class="project-card">
+      <!-- Card 1: Project 1 -->
+      <div class="project-card" data-project="project1">
         <div class="project-img-container">
           <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80" alt="Monolithic Concrete Villa" loading="lazy" />
         </div>
@@ -1071,12 +1228,12 @@
             <span class="project-meta">@anilkrishna · Architecture</span>
             <h3 class="project-title">Monolithic Concrete Villa</h3>
           </div>
-          <a href="#gallery" class="project-link">View Project →</a>
+          <span class="project-link">View Project →</span>
         </div>
       </div>
 
-      <!-- Card 2 -->
-      <div class="project-card">
+      <!-- Card 2: Project 2 -->
+      <div class="project-card" data-project="project2">
         <div class="project-img-container">
           <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80" alt="Minimalist Travertine Residence" loading="lazy" />
         </div>
@@ -1085,12 +1242,12 @@
             <span class="project-meta">@anilkrishna · Interior</span>
             <h3 class="project-title">Minimalist Travertine Residence</h3>
           </div>
-          <a href="#gallery" class="project-link">View Project →</a>
+          <span class="project-link">View Project →</span>
         </div>
       </div>
 
-      <!-- Card 3 -->
-      <div class="project-card">
+      <!-- Card 3: Project 3 -->
+      <div class="project-card" data-project="project3">
         <div class="project-img-container">
           <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80" alt="Glass & Steel Pavilion" loading="lazy" />
         </div>
@@ -1099,7 +1256,7 @@
             <span class="project-meta">@anilkrishna · Spatial Design</span>
             <h3 class="project-title">Glass & Steel Pavilion</h3>
           </div>
-          <a href="#gallery" class="project-link">View Project →</a>
+          <span class="project-link">View Project →</span>
         </div>
       </div>
     </div>
@@ -1148,10 +1305,114 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR WITH LIGHT SMOKE EFFECT -->
+  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // 1. NAVIGATION LOGIC
+      // ==========================================
+      // 1. GOOGLE DRIVE API INTEGRATION
+      // ==========================================
+      const GOOGLE_API_KEY = "AIzaSyCoCi9AP9P4eyuXN3SwykQmJRl1TK8VsTo";
+
+      const projectsData = {
+        project1: {
+          title: "Monolithic Concrete Villa",
+          meta: "@anilkrishna · Architecture",
+          description: "Full architectural interior & spatial geometry execution. Rendered using 3ds Max, V-Ray, and Corona with accurate factory cut-list drawings.",
+          folderId: "1cPyMlmKwd9Ou_Wk1AtmrjicI7JVNHdcu" 
+        },
+        project2: {
+          title: "Minimalist Travertine Residence",
+          meta: "@anilkrishna · Interior",
+          description: "Residential interior design emphasizing travertine stone palettes, subtle natural lighting strategies, and custom parametric furniture modeling.",
+          folderId: "PASTE_PROJECT_2_FOLDER_ID_HERE"
+        },
+        project3: {
+          title: "Glass & Steel Pavilion",
+          meta: "@anilkrishna · Spatial Design",
+          description: "Commercial architectural visualization showcasing structural glass, steel framing, and immersive landscape integration created with Lumion and AutoCAD.",
+          folderId: "PASTE_PROJECT_3_FOLDER_ID_HERE"
+        }
+      };
+
+      // ==========================================
+      // 2. MODAL WINDOW & LIVE GALLERY LOGIC
+      // ==========================================
+      const projectModal = document.getElementById("projectModal");
+      const closeModalBtn = document.getElementById("closeModalBtn");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalMeta = document.getElementById("modalMeta");
+      const modalDescription = document.getElementById("modalDescription");
+      const modalGallery = document.getElementById("modalGallery");
+      const projectCards = document.querySelectorAll(".project-card");
+
+      async function openModal(projectKey) {
+        const data = projectsData[projectKey];
+        if (!data) return;
+
+        modalTitle.textContent = data.title;
+        modalMeta.textContent = data.meta;
+        modalDescription.textContent = "Loading live images..."; 
+        modalGallery.innerHTML = "";
+
+        projectModal.classList.add("active");
+        document.body.classList.add("modal-open");
+
+        try {
+          const fetchUrl = `https://www.googleapis.com/drive/v3/files?q='${data.folderId}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
+          
+          const response = await fetch(fetchUrl);
+          const driveData = await response.json();
+
+          modalDescription.textContent = data.description; 
+
+          if (driveData.files && driveData.files.length > 0) {
+            driveData.files.forEach(file => {
+              const img = document.createElement("img");
+              img.src = `https://lh3.googleusercontent.com/d/${file.id}`; 
+              img.alt = file.name;
+              img.loading = "lazy";
+              modalGallery.appendChild(img);
+            });
+          } else {
+            modalGallery.innerHTML = "<p style='color:var(--text-muted)'>No images found in this folder. Make sure the folder is public.</p>";
+          }
+        } catch (error) {
+          console.error("Error loading images:", error);
+          modalDescription.textContent = "Failed to load images from Google Drive. Please check your API key and Folder ID.";
+        }
+      }
+
+      function closeModal() {
+        projectModal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+      }
+
+      projectCards.forEach(card => {
+        card.addEventListener("click", () => {
+          const projectKey = card.getAttribute("data-project");
+          openModal(projectKey);
+        });
+      });
+
+      closeModalBtn.addEventListener("click", closeModal);
+
+      // Close modal on outside background click
+      projectModal.addEventListener("click", (e) => {
+        if (e.target === projectModal) {
+          closeModal();
+        }
+      });
+
+      // Close modal on Escape key press
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && projectModal.classList.contains("active")) {
+          closeModal();
+        }
+      });
+
+      // ==========================================
+      // 3. NAVIGATION LOGIC
+      // ==========================================
       const navLinks = document.querySelectorAll(".nav-capsule-links .nav-link");
       const activePill = document.getElementById("activePill");
       const navCapsule = document.getElementById("navCapsule");
@@ -1249,7 +1510,9 @@
         }
       });
 
-      // 2. SOLID BLACK DOT CURSOR & LIGHT SMOKE TRAIL LOGIC (Desktop only)
+      // ==========================================
+      // 4. SOLID BLACK DOT CURSOR & SMOKE TRAIL LOGIC
+      // ==========================================
       const cursorDot = document.getElementById("cursorDot");
       let lastSmokeTime = 0;
 
@@ -1278,7 +1541,7 @@
       }
 
       // Add hover scale class on links & interactive elements
-      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .project-card");
+      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .project-card, .modal-close-btn");
       interactiveElements.forEach(elem => {
         elem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
         elem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
