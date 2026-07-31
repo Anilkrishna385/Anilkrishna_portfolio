@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Design Portfolio | @anilkrishna</title>
+  <title>Anil Krishna | Interior & Production Designer</title>
   
   <!-- Google Fonts: BenchNine (Tall Condensed Headings) + Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +12,7 @@
 
   <style>
     :root {
+      /* Sleek Minimalist Architectural Palette */
       --bg-main: #ffffff;
       --bg-alt: #fcfcfc;
       --bg-card: #f8f8f8;
@@ -21,11 +22,13 @@
       --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
       --card-shadow-hover: 0 18px 40px rgba(0, 0, 0, 0.08);
       
+      /* Radii */
       --radius-sm: 12px;
       --radius-md: 18px;
       --radius-lg: 24px;
       --radius-full: 9999px;
 
+      /* BenchNine Font for Tall Architectural Headings */
       --font-heading: 'BenchNine', sans-serif;
       --font-body: 'Plus Jakarta Sans', sans-serif;
     }
@@ -38,6 +41,13 @@
 
     html {
       scroll-behavior: smooth;
+    }
+
+    /* Hide default mouse cursor on desktop to use custom black dot */
+    @media (pointer: fine) {
+      body, a, button, .exp-card, .software-item, .project-card {
+        cursor: none !important;
+      }
     }
 
     body {
@@ -53,18 +63,61 @@
       text-decoration: none;
     }
 
+    /* --- SOLID BLACK DOT CURSOR & SMOKE TRAIL --- */
+    #cursorDot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background-color: #000000;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
+    }
+
+    .cursor-hover #cursorDot {
+      width: 24px;
+      height: 24px;
+      background-color: rgba(0, 0, 0, 0.15);
+      border: 1.5px solid #000000;
+    }
+
+    .smoke-puff {
+      position: fixed;
+      width: 18px;
+      height: 18px;
+      background: radial-gradient(circle, rgba(160, 160, 160, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%) scale(0.8);
+      animation: puffFade 0.65s ease-out forwards;
+    }
+
+    @keyframes puffFade {
+      0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.8); }
+      100% { opacity: 0; transform: translate(-50%, -55%) scale(2.4); }
+    }
+
     /* --- PURE CSS FLUTED GLASS STICKY HEADER --- */
     .header-wrapper {
       position: sticky;
       top: 0;
       width: 100%;
-      height: 76px;
+      height: 70px;
       z-index: 1000;
       overflow: hidden;
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      transition: all 0.3s ease;
     }
 
+    /* Animated light orb drifting behind the glass */
     .header-ambient-light {
       position: absolute;
       top: -40%;
@@ -93,9 +146,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.68);
-      backdrop-filter: blur(14px) saturate(180%);
-      -webkit-backdrop-filter: blur(14px) saturate(180%);
       background-image: repeating-linear-gradient(
         90deg,
         rgba(255, 255, 255, 0.45) 0px,
@@ -113,6 +163,7 @@
       display: flex;
       align-items: center;
       gap: 0.7rem;
+      flex-shrink: 0;
     }
 
     .ig-tag {
@@ -126,67 +177,130 @@
       font-weight: 600;
     }
 
-    .nav-links {
+    /* --- DESKTOP MASTER SEGMENTED CAPSULE --- */
+    .nav-capsule-container {
+      position: relative;
       display: flex;
-      gap: 2.5rem;
-      list-style: none;
+      align-items: center;
+      background: rgba(243, 243, 243, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      padding: 4px;
+      border-radius: var(--radius-full);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
     }
 
-    .nav-links a {
-      font-size: 0.85rem;
+    .nav-active-pill {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      height: calc(100% - 8px);
+      width: 0px;
+      background: var(--text-main);
+      border-radius: var(--radius-full);
+      transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .nav-capsule-links {
+      display: flex;
+      list-style: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    .nav-capsule-links a {
+      display: block;
+      padding: 0.5rem 1.4rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 600;
+      letter-spacing: 1.4px;
+      font-weight: 700;
       color: var(--text-muted);
       transition: color 0.3s ease;
+      border-radius: var(--radius-full);
+      user-select: none;
+      white-space: nowrap;
     }
 
-    .nav-links a:hover {
+    .nav-capsule-links a.active {
+      color: #ffffff;
+    }
+
+    .nav-capsule-links a:hover:not(.active) {
       color: var(--text-main);
     }
 
-    /* --- HERO SECTION --- */
+    /* --- MOBILE DYNAMIC SINGLE CAPSULE NAVBAR --- */
+    .mobile-nav-capsule {
+      display: none;
+      background: var(--text-main);
+      color: #ffffff;
+      padding: 0.45rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .mobile-nav-capsule:active {
+      transform: scale(0.96);
+    }
+
+    #mobileNavText {
+      display: inline-block;
+      transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* --- HERO SECTION: RECRUITER OPTIMIZED TIGHT DESKTOP LAYOUT --- */
     .hero {
-      padding: 6.5rem 8% 6rem;
-      max-width: 1350px;
+      padding: 4.5rem 8% 4rem;
+      max-width: 1250px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 5rem;
+      gap: 4rem;
       align-items: center;
     }
 
     .hero-content {
       text-align: left;
-      max-width: 680px;
+      max-width: 600px;
     }
 
     .hero-meta {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
-      letter-spacing: 3.5px;
+      letter-spacing: 3px;
       color: var(--text-muted);
-      margin-bottom: 1rem;
+      margin-bottom: 0.6rem;
       display: block;
       font-weight: 700;
     }
 
     .hero-title {
       font-family: var(--font-heading);
-      font-size: clamp(4.5rem, 8vw, 7.2rem);
+      font-size: clamp(3.8rem, 7.5vw, 6.8rem);
       font-weight: 700;
-      line-height: 0.9;
-      letter-spacing: 1.5px;
-      margin-bottom: 1.8rem;
+      line-height: 0.92;
+      letter-spacing: 1px;
+      margin-bottom: 1.4rem;
       color: var(--text-main);
       text-transform: uppercase;
     }
 
     .hero-description {
-      font-size: 1.15rem;
+      font-size: clamp(0.98rem, 1.1vw, 1.1rem);
       color: var(--text-muted);
       max-width: 540px;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       line-height: 1.6;
     }
 
@@ -194,7 +308,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      padding: 1rem 2.6rem;
+      padding: 0.9rem 2.4rem;
       background-color: var(--text-main);
       color: #ffffff;
       font-size: 0.85rem;
@@ -219,12 +333,14 @@
     }
 
     .hero-image-circle {
-      width: 380px;
-      height: 380px;
+      width: clamp(200px, 28vw, 340px);
+      height: clamp(200px, 28vw, 340px);
       border-radius: 50%;
       overflow: hidden;
       border: 1px solid var(--border-color);
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+      background: var(--bg-card);
+      flex-shrink: 0;
     }
 
     .hero-image-circle img {
@@ -238,9 +354,9 @@
       transform: scale(1.08);
     }
 
-    /* --- SOFTWARE SECTION --- */
+    /* --- SOFTWARE SECTION: BALANCED SPACING --- */
     .software-section {
-      padding: 5rem 8% 4rem;
+      padding: 4rem 8% 4.5rem;
       border-top: 1px solid var(--border-color);
       background: var(--bg-alt);
     }
@@ -250,38 +366,38 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       color: var(--text-muted);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-weight: 700;
       display: block;
     }
 
     .software-header {
       font-family: var(--font-heading);
-      font-size: 3.4rem;
+      font-size: clamp(2.4rem, 4.5vw, 3.2rem);
       font-weight: 700;
       letter-spacing: 1px;
-      margin-bottom: 3rem;
+      margin-bottom: 2.2rem;
       text-transform: uppercase;
       line-height: 1;
     }
 
     .software-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.2rem;
-      margin-bottom: 4rem;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.1rem;
     }
 
     .software-item {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
-      padding: 0.95rem 1.3rem;
+      padding: 0.85rem 1.2rem;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       gap: 1rem;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(0,0,0,0.015);
+      user-select: none;
     }
 
     .software-item:hover {
@@ -291,8 +407,8 @@
     }
 
     .software-icon {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 10px;
       background: transparent;
       display: flex;
@@ -316,91 +432,189 @@
       color: var(--text-main);
     }
 
-    /* --- EXPERIENCE DEPLOYMENT BOX (LINE PATH TIMELINE) --- */
-    .experience-deployment-box {
-      background: #111111;
-      color: #ffffff;
-      border-radius: var(--radius-lg);
-      padding: 3rem 3.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 3rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    /* --- RECRUITER HIGHLIGHTED EXPERIENCE SECTION --- */
+    .experience-section {
+      padding: 4.5rem 8%;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-main);
     }
 
-    .exp-left h4 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #a0a0a0;
-      margin-bottom: 0.6rem;
-      font-weight: 600;
+    .experience-header-wrap {
+      max-width: 1250px;
+      margin: 0 auto 2.2rem;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .exp-left h3 {
+    .experience-header-wrap h3 {
       font-family: var(--font-heading);
-      font-size: 2.8rem;
+      font-size: clamp(2.6rem, 5vw, 3.6rem);
       font-weight: 700;
+      text-transform: uppercase;
       letter-spacing: 1px;
       line-height: 1;
-      text-transform: uppercase;
+      color: var(--text-main);
     }
 
-    .timeline-path {
+    .experience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.8rem;
+      max-width: 1250px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .exp-card {
       position: relative;
-      padding-left: 1.5rem;
-      border-left: 2px solid rgba(255, 255, 255, 0.2);
+      background: var(--bg-main);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 2.2rem 1.8rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.02);
       display: flex;
       flex-direction: column;
-      gap: 1.8rem;
+      justify-content: flex-start;
+      overflow: hidden;
     }
 
-    .timeline-item {
-      position: relative;
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -1.5rem;
-      top: 0.35rem;
-      width: 10px;
-      height: 10px;
-      background: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-      transform: translateX(-5px);
-    }
-
-    .timeline-company {
-      font-size: 1.05rem;
-      font-weight: 700;
+    /* Current Role Badge Highlight */
+    .current-role-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: var(--text-main);
       color: #ffffff;
-      margin-bottom: 0.15rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      margin-bottom: 0.8rem;
     }
 
-    .timeline-details {
-      font-size: 0.85rem;
-      color: #a0a0a0;
-      letter-spacing: 0.3px;
+    .exp-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--text-main);
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .exp-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--text-main);
+      box-shadow: var(--card-shadow-hover);
+      background: var(--bg-alt);
+    }
+
+    .exp-card:hover::after {
+      width: 100%;
+    }
+
+    .exp-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .exp-role {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .exp-duration {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 0.3rem 0.8rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .exp-company-meta {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .exp-company-meta span {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .exp-divider {
+      width: 100%;
+      height: 1px;
+      background: #eeeeee;
+      margin-bottom: 1.1rem;
+    }
+
+    .exp-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .exp-bullets li {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      position: relative;
+      padding-left: 1.2rem;
+      line-height: 1.5;
+    }
+
+    .exp-bullets li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--text-main);
+      font-weight: 700;
     }
 
     /* --- GALLERY SECTION --- */
     .projects-section {
-      padding: 7rem 8%;
+      padding: 4.5rem 8%;
+      border-top: 1px solid var(--border-color);
     }
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 3.5rem;
+      margin-bottom: 2.5rem;
+      max-width: 1250px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .section-header h2 {
       font-family: var(--font-heading);
-      font-size: 3.8rem;
+      font-size: clamp(2.6rem, 5vw, 3.6rem);
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -414,8 +628,10 @@
 
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.8rem;
+      max-width: 1250px;
+      margin: 0 auto;
     }
 
     .project-card {
@@ -436,7 +652,7 @@
 
     .project-img-container {
       width: 100%;
-      height: 340px;
+      height: 300px;
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
@@ -454,7 +670,7 @@
     }
 
     .project-info {
-      padding: 1.8rem;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -466,14 +682,14 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: var(--text-muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
       font-weight: 600;
     }
 
     .project-title {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 700;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       color: var(--text-main);
     }
 
@@ -493,139 +709,162 @@
       opacity: 0.6;
     }
 
-    /* --- FOOTER --- */
+    /* --- FOOTER: UPGRADED TO CONTACT DETAILS WITH ICON CAPSULES --- */
     footer {
-      padding: 5rem 8% 4rem;
+      padding: 4.5rem 8% 4rem;
       border-top: 1px solid var(--border-color);
       background: var(--bg-main);
       display: flex;
       flex-direction: column;
-      gap: 2.5rem;
+      gap: 2rem;
+      max-width: 1250px;
+      margin: 0 auto;
     }
 
     footer h2 {
       font-family: var(--font-heading);
-      font-size: 3.4rem;
+      font-size: clamp(2.6rem, 5vw, 3.4rem);
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       line-height: 1;
     }
 
-    .social-links-row {
+    .contact-capsules-row {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 1.2rem;
+      gap: 1rem;
     }
 
-    .social-btn {
-      padding: 0.8rem 1.6rem;
-      border: 1px solid var(--border-color);
+    /* Icon Capsule Styling */
+    .contact-capsule {
+      padding: 0.75rem 1.6rem;
+      border: 1.5px solid var(--border-color);
       background: var(--bg-alt);
       color: var(--text-main);
       font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: var(--radius-full);
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.65rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
     }
 
-    .social-btn:hover {
+    .contact-capsule svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .contact-capsule:hover {
       border-color: var(--text-main);
       background: var(--text-main);
       color: #ffffff;
-      transform: translateY(-2px);
-    }
-
-    .email-capsule-btn {
-      padding: 0.85rem 2.2rem;
-      background: var(--text-main);
-      color: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-full);
-      font-size: 0.85rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
-
-    .email-capsule-btn:hover {
-      background: transparent;
-      color: var(--text-main);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     }
 
     .copyright {
-      margin-top: 1.5rem;
+      margin-top: 0.5rem;
       font-size: 0.8rem;
       color: var(--text-muted);
     }
 
+    /* --- ZERO-WASTE MOBILE & TABLET RESPONSIVE OPTIMIZATIONS --- */
+    @media (max-width: 1024px) {
+      .experience-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     @media (max-width: 900px) {
-      .hero {
-        grid-template-columns: 1fr;
-        gap: 3.5rem;
-        padding: 5rem 5% 4rem;
+      .nav-capsule-container {
+        display: none;
       }
 
-      .hero-image-wrapper {
-        justify-content: flex-start;
-      }
-
-      .hero-image-circle {
-        width: 300px;
-        height: 300px;
+      .mobile-nav-capsule {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
       }
 
       .fluted-glass-navbar {
         padding: 0 5%;
       }
 
-      .nav-links {
-        display: none;
+      .hero {
+        padding: 3rem 5% 3rem;
+        gap: 1.5rem;
+        min-height: auto;
       }
 
-      .experience-deployment-box {
+      .software-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .software-item {
+        padding: 0.75rem 0.95rem;
+        gap: 0.7rem;
+      }
+
+      .experience-grid {
         grid-template-columns: 1fr;
-        padding: 2.2rem 2rem;
+        gap: 1.25rem;
       }
 
-      .software-section, .projects-section, footer {
-        padding: 4rem 5%;
+      .experience-section, .software-section, .projects-section, footer {
+        padding: 3.5rem 5% 3rem;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- SOLID BLACK DOT CURSOR ELEMENT -->
+  <div id="cursorDot" aria-hidden="true"></div>
+
   <!-- STICKY FLUTED GLASS HEADER -->
   <header class="header-wrapper">
-    <div class="header-ambient-light"></div>
+    <div class="header-ambient-light" aria-hidden="true"></div>
 
     <nav class="fluted-glass-navbar">
       <div class="logo">
         Design Portfolio
         <span class="ig-tag">@anilkrishna</span>
       </div>
-      <ul class="nav-links">
-        <li><a href="#software">Stack</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+
+      <!-- DESKTOP: MASTER SEGMENTED CAPSULE NAVBAR -->
+      <div class="nav-capsule-container" id="navCapsule">
+        <div class="nav-active-pill" id="activePill"></div>
+        <ul class="nav-capsule-links">
+          <li><a href="#home" class="nav-link">Home</a></li>
+          <li><a href="#software" class="nav-link">Softwares</a></li>
+          <li><a href="#experience" class="nav-link">Experience</a></li>
+          <li><a href="#gallery" class="nav-link">Gallery</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- MOBILE: SINGLE DYNAMIC CAPSULE NAVBAR -->
+      <div class="mobile-nav-capsule" id="mobileNavCapsule">
+        <span id="mobileNavText">HOME</span>
+      </div>
     </nav>
   </header>
 
-  <!-- HERO SECTION -->
-  <section class="hero">
+  <!-- HERO SECTION: HOME -->
+  <section class="hero" id="home">
     <div class="hero-content">
-      <span class="hero-meta">Architectural & Interior Studio</span>
-      <h1 class="hero-title">Minimal forms. Precision craftsmanship.</h1>
+      <span class="hero-meta">INTERIOR & PRODUCTION DESIGNER</span>
+      <h1 class="hero-title">I'M ANIL KRISHNA</h1>
       <p class="hero-description">
-        Selected works and architectural concepts curated directly from our studio archive. Designing elevated spaces with meticulous spatial geometry.
+        I am an Interior & Production Designer focused on crafting tailored, functional, and highly detailed spaces. By leveraging modern digital workflows—including Coohom parametric modeling and end-to-end 2D/3D visualization—I take designs from immersive concepts straight to accurate factory execution.
       </p>
       <a href="#gallery" class="btn">
         Explore Gallery ↗
@@ -634,84 +873,165 @@
 
     <div class="hero-image-wrapper">
       <div class="hero-image-circle">
-        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="@anilkrishna Architectural Circle" />
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Anil Krishna Architectural Portfolio" />
       </div>
     </div>
   </section>
 
-  <!-- PREMIUM TECHNICAL STACK & WORK EXPERIENCE TIMELINE -->
+  <!-- PREMIUM TECHNICAL STACK (DIRECT GOOGLE DRIVE CONTENT LINKS) -->
   <section class="software-section" id="software">
     <span class="section-label">Technical Proficiency</span>
-    <h2 class="software-header">Premium Software & Modeling Stack</h2>
+    <h2 class="software-header">Using Softwares</h2>
 
     <div class="software-grid">
+      <!-- 1. Coohom -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/coohom.webp" alt="Coohom" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1wsFxLA0WkyICGp8arBfrZEBhwL48q_3q" alt="Coohom Logo" />
+        </div>
         <span class="software-name">Coohom</span>
       </div>
+
+      <!-- 2. ZW CAD -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/zw_cad.webp" alt="ZW CAD" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1EjDKK3jxjuZlNF7ewfAZoDutNR-Uv-u9" alt="ZW CAD Logo" />
+        </div>
         <span class="software-name">ZW CAD</span>
       </div>
+
+      <!-- 3. Coohom Parametric -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Coohom_Parametric.webp" alt="Coohom Parametric" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/17zVWqdNTy0kY-MjjOpWEsgZjxXrhZxLT" alt="Coohom Parametric Logo" />
+        </div>
         <span class="software-name">Coohom Parametric</span>
       </div>
+
+      <!-- 4. Corona Renderer -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Corona.webp" alt="Corona" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1CetCqdR6ryUT1fZKNhFoEkm-4BsSRcXX" alt="Corona Logo" />
+        </div>
         <span class="software-name">Corona</span>
       </div>
+
+      <!-- 5. V-Ray -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/V_ray.webp" alt="V-Ray" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1ZKUAWKiu1q8fABfRl7pkThOk02J_Ru5B" alt="V-Ray Logo" />
+        </div>
         <span class="software-name">V-Ray</span>
       </div>
+
+      <!-- 6. Lumion -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Lumion.webp" alt="Lumion" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/16xXfz70-3Eot9vD64HpEw4IXX6Ug1ot2" alt="Lumion Logo" />
+        </div>
         <span class="software-name">Lumion</span>
       </div>
+
+      <!-- 7. Photoshop -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Photo_shop.webp" alt="Photoshop" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1fB5Pef4Q4eWdvGi1GvkN-MrxP_k7waAw" alt="Photoshop Logo" />
+        </div>
         <span class="software-name">Photoshop</span>
       </div>
+
+      <!-- 8. SketchUp -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Sketchup.webp" alt="SketchUp" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1V4729JaP8WPp11uw51Oc2xK9LU11o65-" alt="SketchUp Logo" />
+        </div>
         <span class="software-name">SketchUp</span>
       </div>
+
+      <!-- 9. AutoCAD -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/Autocad.webp" alt="AutoCAD" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1phk8VDMuyPTiPOzH2edpsNIklwfbAPpS" alt="AutoCAD Logo" />
+        </div>
         <span class="software-name">AutoCAD</span>
       </div>
+
+      <!-- 10. 3ds Max -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/3ds_max.webp" alt="3ds Max" /></div>
+        <div class="software-icon">
+          <img src="https://lh3.googleusercontent.com/d/1zciiLPRZmW_0LoUmu2d2_39usVeYgrHQ" alt="3ds Max Logo" />
+        </div>
         <span class="software-name">3ds Max</span>
       </div>
-      <!-- Google Workspace Added Here -->
+
+      <!-- 11. Google Workspace -->
       <div class="software-item">
-        <div class="software-icon"><img src="images/google_workspace.webp" alt="Google Workspace" /></div>
+        <div class="software-icon">
+          <img src="https://api.iconify.design/logos:google-workspace.svg" alt="Google Workspace Logo" />
+        </div>
         <span class="software-name">Google Workspace</span>
       </div>
     </div>
+  </section>
 
-    <!-- EXPERIENCE DEPLOYMENT BOX (LINE PATH TIMELINE MODEL FROM CV) -->
-    <div class="experience-deployment-box">
-      <div class="exp-left">
-        <h4>Professional Track Record</h4>
-        <h3>Work Experience<br />Timeline</h3>
+  <!-- RECRUITER HIGHLIGHTED EXPERIENCE SECTION -->
+  <section class="experience-section" id="experience">
+    <div class="experience-header-wrap">
+      <div>
+        <span class="section-label">Track Record & Career</span>
+        <h3>Work Experience</h3>
       </div>
-      
-      <div class="timeline-path">
-        <div class="timeline-item">
-          <div class="timeline-company">Faboolux Pvt Ltd</div>
-          <div class="timeline-details">Kochi, IN &bull; 09/2024 - Present</div>
+    </div>
+
+    <div class="experience-grid">
+      <!-- 1. Faboolux Pvt Ltd -->
+      <div class="exp-card">
+        <span class="current-role-badge">Current Role</span>
+        <div class="exp-card-header">
+          <h4 class="exp-role">INTERIOR DESIGNER</h4>
+          <span class="exp-duration">09/2024 - Current</span>
         </div>
-        <div class="timeline-item">
-          <div class="timeline-company">AVY infra</div>
-          <div class="timeline-details">Bangalore, IN &bull; 06/2023 - 08/2024</div>
+        <div class="exp-company-meta">
+          <span>Faboolux Pvt ltd</span> · Kochi, IN
         </div>
-        <div class="timeline-item">
-          <div class="timeline-company">Jaccana PVT LTD</div>
-          <div class="timeline-details">Bangalore, IN &bull; 04/2022 - 06/2023</div>
+        <div class="exp-divider"></div>
+        <ul class="exp-bullets">
+          <li>Assisted with customer requests and answered questions to improve satisfaction[cite: 1]. Provided excellent service and attention to customers when face-to-face or through phone conversations[cite: 1].</li>
+          <li>Identified needs of customers promptly and efficiently[cite: 1].</li>
+        </ul>
+      </div>
+
+      <!-- 2. AVY Infra -->
+      <div class="exp-card">
+        <div class="exp-card-header">
+          <h4 class="exp-role">INTERIOR DESIGNER</h4>
+          <span class="exp-duration">06/2023 - 08/2024</span>
         </div>
+        <div class="exp-company-meta">
+          <span>AVY infra</span> · Bangalore, IN
+        </div>
+        <div class="exp-divider"></div>
+        <ul class="exp-bullets">
+          <li>Managed multiple projects simultaneously while meeting tight deadlines set by clients[cite: 1].</li>
+          <li>Collaborated closely with customers, adjusting plans to satisfy client needs and requirements[cite: 1].</li>
+          <li>Used natural and artificial lighting strategies to highlight features and areas of rooms[cite: 1].</li>
+        </ul>
+      </div>
+
+      <!-- 3. Jaccana PVT LTD -->
+      <div class="exp-card">
+        <div class="exp-card-header">
+          <h4 class="exp-role">INTERIOR PRODUCT DESIGNER</h4>
+          <span class="exp-duration">04/2022 - 06/2023</span>
+        </div>
+        <div class="exp-company-meta">
+          <span>Jaccana PVT LTD</span> · Bangalore, IN
+        </div>
+        <div class="exp-divider"></div>
+        <ul class="exp-bullets">
+          <li>Prepared quantity BOQ[cite: 1]. Drawings for cutlist[cite: 1].</li>
+          <li>Created 2D drawings for production[cite: 1].</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -726,9 +1046,10 @@
     </div>
 
     <div class="projects-grid">
+      <!-- Card 1 -->
       <div class="project-card">
         <div class="project-img-container">
-          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80" alt="Gallery 01" />
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80" alt="Monolithic Concrete Villa" loading="lazy" />
         </div>
         <div class="project-info">
           <div>
@@ -739,9 +1060,10 @@
         </div>
       </div>
 
+      <!-- Card 2 -->
       <div class="project-card">
         <div class="project-img-container">
-          <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80" alt="Gallery 02" />
+          <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=80" alt="Minimalist Travertine Residence" loading="lazy" />
         </div>
         <div class="project-info">
           <div>
@@ -752,9 +1074,10 @@
         </div>
       </div>
 
+      <!-- Card 3 -->
       <div class="project-card">
         <div class="project-img-container">
-          <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80" alt="Gallery 03" />
+          <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80" alt="Glass & Steel Pavilion" loading="lazy" />
         </div>
         <div class="project-info">
           <div>
@@ -767,21 +1090,185 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- FOOTER: CONTACT DETAILS WITH ICON CAPSULES -->
   <footer id="contact">
-    <h2>Let's build together.</h2>
+    <h2>Contact Details</h2>
 
-    <div class="social-links-row">
-      <a href="https://linkedin.com" target="_blank" rel="noreferrer" class="social-btn">LinkedIn ↗</a>
-      <a href="https://instagram.com/anilkrishna" target="_blank" rel="noreferrer" class="social-btn">Instagram ↗</a>
-      <a href="https://whatsapp.com" target="_blank" rel="noreferrer" class="social-btn">WhatsApp ↗</a>
-      <a href="mailto:contact@anilkrishna.com" class="email-capsule-btn">contact@anilkrishna.com ✉</a>
+    <div class="contact-capsules-row">
+      <!-- 1. WhatsApp Capsule -->
+      <a href="https://wa.me/919188774739" target="_blank" rel="noreferrer" class="contact-capsule">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.06L2 22l5.08-1.33C8.5 21.5 10.21 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.57 0-3.08-.43-4.4-1.25l-.31-.19-3.01.79.8-2.93-.2-.33C3.99 14.83 3.5 13.44 3.5 12 3.5 7.31 7.31 3.5 12 3.5s8.5 3.81 8.5 8.5-3.81 8.5-8.5 8.5zm4.62-6.38c-.25-.13-1.48-.73-1.71-.82-.23-.09-.4-.13-.57.13-.17.25-.66.82-.81.99-.15.17-.3.19-.55.06-.25-.13-1.06-.39-2.02-1.24-.74-.66-1.24-1.47-1.39-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.24-.41.08-.17.04-.31-.02-.43-.06-.13-.57-1.38-.78-1.89-.21-.5-.42-.43-.57-.44-.15-.01-.32-.01-.49-.01-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.91 2.44 1.04 2.61.13.17 1.79 2.73 4.34 3.83.61.26 1.08.42 1.45.54.61.19 1.17.17 1.61.1.49-.08 1.48-.61 1.69-1.19.21-.58.21-1.08.15-1.19-.06-.11-.23-.18-.48-.31z"/>
+        </svg>
+        WhatsApp
+      </a>
+
+      <!-- 2. Instagram Capsule -->
+      <a href="https://www.instagram.com/arc.designs_?igsh=MXNyOWplc2xkc2w2bA==" target="_blank" rel="noreferrer" class="contact-capsule">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+        </svg>
+        Instagram
+      </a>
+
+      <!-- 3. LinkedIn Capsule -->
+      <a href="https://linkedin.com" target="_blank" rel="noreferrer" class="contact-capsule">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+        </svg>
+        LinkedIn
+      </a>
+
+      <!-- 4. Email Capsule -->
+      <a href="mailto:anilkrishna385@gmail.com" class="contact-capsule">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+        anilkrishna385@gmail.com
+      </a>
     </div>
 
     <div class="copyright">
-      &copy; 2026 @anilkrishna. All Rights Reserved.
+      &copy; 2026 Anil Krishna. All Rights Reserved.
     </div>
   </footer>
 
+  <!-- SCRIPT: SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR WITH LIGHT SMOKE EFFECT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. NAVIGATION LOGIC
+      const navLinks = document.querySelectorAll(".nav-capsule-links .nav-link");
+      const activePill = document.getElementById("activePill");
+      const navCapsule = document.getElementById("navCapsule");
+      const mobileNavText = document.getElementById("mobileNavText");
+      const mobileNavCapsule = document.getElementById("mobileNavCapsule");
+
+      const sectionOrder = ["#home", "#software", "#experience", "#gallery", "#contact"];
+
+      function movePillTo(target) {
+        if (!target || !navCapsule) return;
+        const capsuleRect = navCapsule.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        const offsetLeft = targetRect.left - capsuleRect.left;
+        const width = targetRect.width;
+
+        activePill.style.left = `${offsetLeft}px`;
+        activePill.style.width = `${width}px`;
+
+        navLinks.forEach(link => link.classList.remove("active"));
+        target.classList.add("active");
+      }
+
+      function updateMobileCapsuleText(newText) {
+        if (!mobileNavText) return;
+        if (mobileNavText.textContent !== newText) {
+          mobileNavText.style.opacity = "0";
+          mobileNavText.style.transform = "translateY(-4px)";
+          setTimeout(() => {
+            mobileNavText.textContent = newText;
+            mobileNavText.style.opacity = "1";
+            mobileNavText.style.transform = "translateY(0)";
+          }, 160);
+        }
+      }
+
+      if (navLinks.length > 0) {
+        movePillTo(navLinks[0]);
+      }
+
+      navLinks.forEach(link => {
+        link.addEventListener("click", (e) => {
+          movePillTo(e.currentTarget);
+        });
+      });
+
+      if (mobileNavCapsule) {
+        mobileNavCapsule.addEventListener("click", () => {
+          const currentText = mobileNavText.textContent.toUpperCase();
+          let nextIdx = 0;
+          if (currentText === "HOME") nextIdx = 1;
+          else if (currentText === "SOFTWARES") nextIdx = 2;
+          else if (currentText === "EXPERIENCE") nextIdx = 3;
+          else if (currentText === "GALLERY") nextIdx = 4;
+          else nextIdx = 0;
+
+          const targetElem = document.querySelector(sectionOrder[nextIdx]);
+          if (targetElem) {
+            targetElem.scrollIntoView({ behavior: "smooth" });
+          }
+        });
+      }
+
+      const sections = document.querySelectorAll("section[id], footer[id]");
+      const observerOptions = {
+        root: null,
+        rootMargin: "-25% 0px -65% 0px",
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute("id");
+            const matchingLink = document.querySelector(`.nav-capsule-links a[href="#${id}"]`);
+            if (matchingLink) {
+              movePillTo(matchingLink);
+            }
+
+            if (id === "home") updateMobileCapsuleText("HOME");
+            else if (id === "software") updateMobileCapsuleText("SOFTWARES");
+            else if (id === "experience") updateMobileCapsuleText("EXPERIENCE");
+            else if (id === "gallery") updateMobileCapsuleText("GALLERY");
+            else if (id === "contact") updateMobileCapsuleText("CONTACT");
+          }
+        });
+      }, observerOptions);
+
+      sections.forEach(section => observer.observe(section));
+
+      window.addEventListener("resize", () => {
+        const currentActive = document.querySelector(".nav-capsule-links a.active");
+        if (currentActive) {
+          movePillTo(currentActive);
+        }
+      });
+
+      // 2. SOLID BLACK DOT CURSOR & LIGHT SMOKE TRAIL LOGIC (Desktop only)
+      const cursorDot = document.getElementById("cursorDot");
+      let lastSmokeTime = 0;
+
+      window.addEventListener("mousemove", (e) => {
+        cursorDot.style.top = `${e.clientY}px`;
+        cursorDot.style.left = `${e.clientX}px`;
+
+        const now = Date.now();
+        // Emit smoke puff every 50ms while moving for a silky smooth trail
+        if (now - lastSmokeTime > 50) {
+          createSmokePuff(e.clientX, e.clientY);
+          lastSmokeTime = now;
+        }
+      });
+
+      function createSmokePuff(x, y) {
+        const puff = document.createElement("div");
+        puff.className = "smoke-puff";
+        puff.style.left = `${x}px`;
+        puff.style.top = `${y}px`;
+        document.body.appendChild(puff);
+
+        setTimeout(() => {
+          puff.remove();
+        }, 650);
+      }
+
+      // Add hover scale class on links & interactive elements
+      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .project-card");
+      interactiveElements.forEach(elem => {
+        elem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+        elem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+      });
+    });
+  </script>
 </body>
 </html>
