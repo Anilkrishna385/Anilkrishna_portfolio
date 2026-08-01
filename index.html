@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=BenchNine:wght@300;400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Mozilla PDF.js for Multi-Page Stacked PDF Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     :root {
       /* Sleek Minimalist Architectural Palette */
@@ -676,7 +679,7 @@
       align-items: stretch;
     }
 
-    /* --- CLASSIC BOX CARD (For Folders with ONLY Images or Direct Image Files) --- */
+    /* --- CLASSIC BOX CARD --- */
     .project-card {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
@@ -770,7 +773,7 @@
       opacity: 0.6;
     }
 
-    /* --- STANDALONE FROSTED FOLDER ICON (ONLY FOR FOLDERS WITH SUBFOLDERS) --- */
+    /* --- STANDALONE FROSTED FOLDER ICON --- */
     .folder-only-item {
       display: flex;
       flex-direction: column;
@@ -1078,6 +1081,7 @@
       display: flex;
       flex-direction: column;
       gap: 2rem;
+      align-items: center;
     }
 
     .modal-stacked-gallery img {
@@ -1087,6 +1091,8 @@
       border: 1px solid var(--border-color);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       object-fit: cover;
+      display: block;
+      background: #ffffff;
     }
 
     /* --- FOOTER --- */
@@ -1505,9 +1511,14 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: RULE-BASED FOLDER vs CARD RENDERING + IN-PLACE DRILL-DOWN + INSTANT CACHE -->
+  <!-- SCRIPT: INSTANT 0ms CACHE + MULTI-PAGE STACKED PDF RENDERING + TACTILE CARD PULL-OUT HOVER -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Configure Mozilla PDF.js Worker
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+
       // ==========================================
       // 1. AUTOMATED GOOGLE DRIVE ENGINE
       // ==========================================
@@ -1516,7 +1527,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v11";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v13";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1533,9 +1544,9 @@
       let galleryHistoryStack = [];
       let multiImageCards = [];
 
-      // Helper: recursively grab the first image inside a folder or its children to use as fallback cover
+      // Helper: recursively grab the first image or PDF thumbnail inside a folder to use as fallback cover
       async function getFirstImageRecursive(folderId) {
-        const imagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&fields=files(id,name)&pageSize=1&key=${GOOGLE_API_KEY}`;
+        const imagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+(mimeType+contains+'image/'+or+mimeType='application/pdf')+and+trashed=false&fields=files(id,name,mimeType)&pageSize=1&key=${GOOGLE_API_KEY}`;
         const imagesRes = await fetch(imagesUrl);
         const imagesData = await imagesRes.json();
         if (imagesData.files && imagesData.files.length > 0) {
@@ -1553,7 +1564,7 @@
         return null;
       }
 
-      // Recursively build a hierarchical tree of folders, subfolders, and direct images
+      // Recursively build a hierarchical tree of folders, subfolders, images, AND PDFs
       async function buildFolderTree(folderId, pathPrefix = "") {
         const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
         const res = await fetch(foldersUrl);
@@ -1566,17 +1577,17 @@
         const folderPromises = data.files.map(async (folder) => {
           const fullPath = pathPrefix ? `${pathPrefix} / ${folder.name}` : folder.name;
 
-          // 1. Fetch direct images inside this folder
-          const directImagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&fields=files(id,name)&pageSize=20&key=${GOOGLE_API_KEY}`;
-          const directImagesRes = await fetch(directImagesUrl);
-          const directImagesData = await directImagesRes.json();
-          const directImages = directImagesData.files || [];
+          // 1. Fetch direct images AND PDF documents inside this folder
+          const directFilesUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+(mimeType+contains+'image/'+or+mimeType='application/pdf')+and+trashed=false&fields=files(id,name,mimeType)&pageSize=20&key=${GOOGLE_API_KEY}`;
+          const directFilesRes = await fetch(directFilesUrl);
+          const directFilesData = await directFilesRes.json();
+          const directFiles = directFilesData.files || [];
 
           // 2. Fetch nested subfolders
           const subfolders = await buildFolderTree(folder.id, fullPath);
 
-          // 3. Determine cover image: direct image first, otherwise fallback to subfolder image
-          let coverImages = directImages.slice(0, 10);
+          // 3. Determine cover image: direct file first, otherwise fallback to subfolder file
+          let coverImages = directFiles.slice(0, 10);
           if (coverImages.length === 0 && subfolders.length > 0) {
             const fallbackImg = await getFirstImageRecursive(folder.id);
             if (fallbackImg) {
@@ -1584,14 +1595,14 @@
             }
           }
 
-          // Keep folder in the tree if it contains images or subfolders
-          if (directImages.length > 0 || subfolders.length > 0) {
+          // Keep folder in the tree if it contains files or subfolders
+          if (directFiles.length > 0 || subfolders.length > 0) {
             return {
               id: folder.id,
               name: folder.name,
               path: fullPath,
               coverImages: coverImages,
-              directImages: directImages,
+              directImages: directFiles,
               subfolders: subfolders
             };
           }
@@ -1626,7 +1637,7 @@
           return;
         }
 
-        // 2. Render Folders conditionally: ONLY IMAGES = Box Card, HAS SUBFOLDERS = Standalone Folder Icon
+        // 2. Render Folders conditionally: ONLY IMAGES/FILES = Box Card, HAS SUBFOLDERS = Standalone Folder Icon
         subfoldersToRender.forEach((subfolder) => {
           const coverList = subfolder.coverImages || [];
           const hasSubfolders = subfolder.subfolders && subfolder.subfolders.length > 0;
@@ -1635,8 +1646,8 @@
           let slidesHtml = "";
           coverList.forEach((file, idx) => {
             const activeClass = idx === 0 ? "active-slide" : "";
-            const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
-            slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="slide-img ${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
+            const imgUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
+            slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="slide-img ${activeClass}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80';"/>`;
           });
 
           if (hasSubfolders) {
@@ -1710,7 +1721,7 @@
             folderElem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
             folderElem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
           } else {
-            // ONLY IMAGES (No Subfolders) -> Show Classic Box Card with Sliding Feature
+            // ONLY IMAGES/FILES (No Subfolders) -> Show Classic Box Card with Sliding Feature
             const card = document.createElement("div");
             card.className = "project-card";
             
@@ -1747,9 +1758,9 @@
           }
         });
 
-        // 3. Render Direct Images inside this folder as crisp Box Cards
+        // 3. Render Direct Images or PDFs inside this folder as crisp Box Cards
         imagesToRender.forEach((file) => {
-          const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+          const imgUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
           const card = document.createElement("div");
           card.className = "project-card";
           card.onclick = () => openStackedGalleryModal(file.name, folderNode ? folderNode.path : "Gallery", [file]);
@@ -1760,7 +1771,7 @@
             </div>
             <div class="project-info">
               <div>
-                <span class="project-meta">@anilkrishna · Architectural Frame</span>
+                <span class="project-meta">@anilkrishna · ${file.mimeType === 'application/pdf' ? 'PDF Document' : 'Architectural Frame'}</span>
                 <h3 class="project-title">${file.name}</h3>
               </div>
               <span class="project-link">VIEW FULLSCREEN ↗</span>
@@ -1792,24 +1803,69 @@
         }
       });
 
-      // Stacked Editorial Lightbox Modal (Scrolls vertically through all project images!)
-      function openStackedGalleryModal(projectTitle, projectPath, imageFiles) {
+      // Stacked Editorial Modal (Scrolls vertically through images AND Multi-Page PDFs!)
+      async function openStackedGalleryModal(projectTitle, projectPath, files) {
         modalTitle.textContent = projectTitle;
         modalMeta.textContent = `@anilkrishna · ${projectPath}`;
         modalDescription.textContent = `Full architectural execution and spatial geometry mapping for ${projectTitle}.`;
         
-        modalGallery.innerHTML = "";
-        imageFiles.forEach(file => {
-          const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
-          const img = document.createElement("img");
-          img.src = imgUrl;
-          img.alt = file.name || projectTitle;
-          img.loading = "lazy";
-          modalGallery.appendChild(img);
-        });
-
+        modalGallery.innerHTML = "<p style='color: var(--text-muted); padding: 1rem;'>Loading stacked frames...</p>";
         projectModal.classList.add("active");
         document.body.classList.add("modal-open");
+
+        modalGallery.innerHTML = "";
+        for (const file of files) {
+          const isPdf = file.mimeType === "application/pdf" || (file.name && file.name.toLowerCase().endsWith(".pdf"));
+          
+          if (isPdf) {
+            let renderedPdf = false;
+            try {
+              // Attempt to fetch and render multi-page PDF via PDF.js into stacked high-res images
+              const pdfUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+              const loadingTask = pdfjsLib.getDocument({ url: pdfUrl, withCredentials: false });
+              const pdf = await loadingTask.promise;
+
+              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                // Render page as image frame matching standard image styling
+                const pageImg = document.createElement("img");
+                pageImg.src = canvas.toDataURL("image/jpeg", 0.92);
+                pageImg.alt = `${file.name} - Page ${pageNum}`;
+                pageImg.loading = "lazy";
+                modalGallery.appendChild(pageImg);
+              }
+              renderedPdf = true;
+            } catch (err) {
+              console.warn("PDF.js direct parse failed, rendering high-res Drive thumbnail stack...", err);
+            }
+
+            if (!renderedPdf) {
+              const imgUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600`;
+              const img = document.createElement("img");
+              img.src = imgUrl;
+              img.alt = file.name;
+              img.loading = "lazy";
+              modalGallery.appendChild(img);
+            }
+          } else {
+            // STANDARD ARCHITECTURAL IMAGE FRAME
+            const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+            const img = document.createElement("img");
+            img.src = imgUrl;
+            img.alt = file.name || projectTitle;
+            img.loading = "lazy";
+            modalGallery.appendChild(img);
+          }
+        }
       }
 
       function closeModal() {
