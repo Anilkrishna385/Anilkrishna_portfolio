@@ -45,7 +45,8 @@
 
     /* Hide default mouse cursor on desktop to use custom black dot */
     @media (pointer: fine) {
-      body, a, button, .exp-card, .software-item, .project-card, .modal-close-btn {
+      body, a, button, .exp-card, .software-item, .project-card, .modal-close-btn,
+      .project-modal-overlay, .project-modal-content, .modal-stacked-gallery img {
         cursor: none !important;
       }
     }
@@ -78,7 +79,7 @@
       background-color: #000000;
       border-radius: 50%;
       pointer-events: none;
-      z-index: 9999;
+      z-index: 100001; /* Updated to sit above modal overlay (10000) */
       transform: translate(-50%, -50%);
       transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
     }
@@ -97,7 +98,7 @@
       background: radial-gradient(circle, rgba(160, 160, 160, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
-      z-index: 9998;
+      z-index: 100000; /* Updated to sit above modal overlay but below cursor dot */
       transform: translate(-50%, -50%) scale(0.8);
       animation: puffFade 0.65s ease-out forwards;
     }
