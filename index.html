@@ -47,7 +47,7 @@
     @media (pointer: fine) {
       body, a, button, .exp-card, .software-item, .project-card, .modal-close-btn,
       .project-modal-overlay, .project-modal-content, .modal-stacked-gallery img,
-      .subfolder-card, .modal-back-btn {
+      .gallery-back-btn {
         cursor: none !important;
       }
     }
@@ -266,7 +266,7 @@
       transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* --- HERO SECTION: RECRUITER OPTIMIZED TIGHT DESKTOP LAYOUT --- */
+    /* --- HERO SECTION --- */
     .hero {
       padding: 4.5rem 8% 4rem;
       max-width: 1250px;
@@ -361,7 +361,7 @@
       transform: scale(1.08);
     }
 
-    /* --- SOFTWARE SECTION: BALANCED SPACING --- */
+    /* --- SOFTWARE SECTION --- */
     .software-section {
       padding: 4rem 8% 4.5rem;
       border-top: 1px solid var(--border-color);
@@ -602,10 +602,11 @@
       font-weight: 700;
     }
 
-    /* --- GALLERY SECTION (TOP-LEVEL FOLDERS WITH HORIZONTAL SLIDE) --- */
+    /* --- GALLERY SECTION (IN-PLACE DRILL-DOWN FOLDER EXPLORER) --- */
     .projects-section {
       padding: 4.5rem 8%;
       border-top: 1px solid var(--border-color);
+      min-height: 600px;
     }
 
     .section-header {
@@ -616,6 +617,38 @@
       max-width: 1250px;
       margin-left: auto;
       margin-right: auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .gallery-header-left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .gallery-back-btn {
+      display: none;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.5rem 1.1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .gallery-back-btn:hover {
+      background: var(--text-main);
+      color: #ffffff;
+      transform: translateX(-4px);
     }
 
     .section-header h2 {
@@ -625,6 +658,7 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       line-height: 1;
+      color: var(--text-main);
     }
 
     .section-header p {
@@ -657,16 +691,60 @@
       box-shadow: var(--card-shadow-hover);
     }
 
+    /* Padded canvas for macOS Frosted Folder Icon */
     .project-img-container {
       width: 100%;
       height: 300px;
       overflow: hidden;
       position: relative;
-      background: #f0f0f0;
+      background: #f4f6f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
     }
 
-    /* Horizontal Sliding Animation Engine */
-    .project-img-container img {
+    /* macOS Frosted Glass Folder Graphic Wrapper */
+    .mac-folder {
+      position: relative;
+      width: 100%;
+      max-width: 240px;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      user-select: none;
+    }
+
+    .folder-tab {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 44%;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px 16px 0 0;
+      z-index: 3;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      border-bottom: none;
+    }
+
+    .folder-back {
+      position: absolute;
+      top: 12px;
+      right: 0;
+      width: 93%;
+      height: 90%;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #2b7cff 0%, #0d48d9 100%);
+      box-shadow: 0 8px 25px rgba(22, 104, 255, 0.35);
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .folder-back img {
       position: absolute;
       top: 0;
       left: 0;
@@ -678,21 +756,63 @@
       will-change: transform;
     }
 
-    /* Currently visible slide */
-    .project-img-container img.active-slide {
+    .folder-back img.active-slide {
       transform: translateX(0);
       z-index: 2;
     }
 
-    /* Slide leaving to the left */
-    .project-img-container img.exit-slide {
+    .folder-back img.exit-slide {
       transform: translateX(-100%);
       z-index: 1;
     }
 
-    /* Subtle zoom on hover for the active slide */
-    .project-card:hover .project-img-container img.active-slide {
-      transform: translateX(0) scale(1.06);
+    .project-card:hover .folder-back img.active-slide {
+      transform: translateX(0) scale(1.08);
+    }
+
+    .folder-front {
+      position: relative;
+      width: 100%;
+      height: 82%;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(215, 233, 255, 0.48) 100%);
+      backdrop-filter: blur(8px) saturate(150%);
+      -webkit-backdrop-filter: blur(8px) saturate(150%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 12px 30px rgba(0, 80, 255, 0.12);
+      z-index: 3;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 20px;
+    }
+
+    .folder-handle {
+      width: 38px;
+      height: 9px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Clean full-bleed container when rendering Image Cards inside a folder */
+    .project-img-container.clean-image-mode {
+      padding: 0;
+      background: #f0f0f0;
+    }
+
+    .project-img-container.clean-image-mode img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: relative;
+      transform: none;
+      opacity: 1;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .project-card:hover .project-img-container.clean-image-mode img {
+      transform: scale(1.06);
     }
 
     .project-info {
@@ -736,25 +856,24 @@
       opacity: 0.6;
     }
 
-    /* --- FULL-SCREEN STACKED PROJECT MODAL OVERLAY --- */
+    /* --- FULLSCREEN IMAGE LIGHTBOX MODAL --- */
     .project-modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(17, 17, 17, 0.82);
+      background: rgba(17, 17, 17, 0.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       z-index: 10000;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      overflow-y: auto;
+      align-items: center;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease;
-      padding: 3rem 5%;
+      padding: 2rem 5%;
     }
 
     .project-modal-overlay.active {
@@ -765,67 +884,33 @@
     .project-modal-content {
       background: var(--bg-main);
       border-radius: var(--radius-lg);
-      max-width: 1000px;
+      max-width: 1100px;
       width: 100%;
-      margin: auto 0;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-      transform: translateY(30px);
+      transform: translateY(20px);
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
     }
 
     .project-modal-overlay.active .project-modal-content {
       transform: translateY(0);
     }
 
-    /* Modal Sticky Header */
     .modal-header {
-      position: sticky;
-      top: 0;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 1.4rem 2.5rem;
+      padding: 1.2rem 2rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 10;
-      gap: 1rem;
-    }
-
-    .modal-header-left {
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-    }
-
-    .modal-back-btn {
-      display: none;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-full);
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .modal-back-btn:hover {
-      background: var(--text-main);
-      color: #ffffff;
     }
 
     .modal-title-area h3 {
       font-family: var(--font-heading);
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       text-transform: uppercase;
       line-height: 1;
@@ -842,8 +927,8 @@
     .modal-close-btn {
       background: #f0f0f0;
       border: 1px solid var(--border-color);
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -853,7 +938,6 @@
       color: var(--text-main);
       transition: all 0.3s ease;
       line-height: 1;
-      flex-shrink: 0;
     }
 
     .modal-close-btn:hover {
@@ -862,114 +946,23 @@
       transform: rotate(90deg);
     }
 
-    /* Modal Body: Subfolder Grid & Stacked Editorial Images */
     .modal-body {
-      padding: 2.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    .modal-description {
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 760px;
-    }
-
-    /* Nested subfolder grid inside the modal */
-    .subfolders-section {
-      display: none;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .subfolders-section.active {
-      display: flex;
-    }
-
-    .subfolders-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    .subfolders-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.2rem;
-    }
-
-    .subfolder-card {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .subfolder-card:hover {
-      border-color: var(--text-main);
-      background: var(--bg-main);
-      transform: translateY(-3px);
-      box-shadow: var(--card-shadow);
-    }
-
-    .subfolder-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: var(--text-main);
-      color: #ffffff;
+      padding: 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      font-weight: 700;
-      font-size: 1.2rem;
+      overflow: auto;
+      background: #0f0f0f;
     }
 
-    .subfolder-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .subfolder-name {
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--text-main);
-    }
-
-    .subfolder-count {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .modal-stacked-gallery {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .modal-stacked-gallery img {
-      width: 100%;
-      height: auto;
+    .modal-body img {
+      max-width: 100%;
+      max-height: 75vh;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      object-fit: cover;
+      object-fit: contain;
     }
 
-    /* --- FOOTER: UPGRADED TO CONTACT DETAILS WITH ICON CAPSULES --- */
+    /* --- FOOTER --- */
     footer {
       padding: 4.5rem 8% 4rem;
       border-top: 1px solid var(--border-color);
@@ -1034,7 +1027,7 @@
       color: var(--text-muted);
     }
 
-    /* --- ZERO-WASTE MOBILE & TABLET RESPONSIVE OPTIMIZATIONS --- */
+    /* --- RESPONSIVE OPTIMIZATIONS --- */
     @media (max-width: 1024px) {
       .experience-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1094,15 +1087,6 @@
       .experience-section, .software-section, .projects-section, footer {
         padding: 3.5rem 5% 3rem;
       }
-
-      .modal-header {
-        padding: 1.2rem 1.5rem;
-      }
-
-      .modal-body {
-        padding: 1.5rem;
-        gap: 1.5rem;
-      }
     }
   </style>
 </head>
@@ -1111,31 +1095,17 @@
   <!-- SOLID BLACK DOT CURSOR ELEMENT -->
   <div id="cursorDot" aria-hidden="true"></div>
 
-  <!-- FULL-SCREEN PROJECT MODAL WITH EXPLORER DRILL-DOWN -->
+  <!-- FULLSCREEN IMAGE LIGHTBOX MODAL -->
   <div class="project-modal-overlay" id="projectModal">
     <div class="project-modal-content">
       <div class="modal-header">
-        <div class="modal-header-left">
-          <button class="modal-back-btn" id="modalBackBtn">← Back</button>
-          <div class="modal-title-area">
-            <span id="modalMeta">@anilkrishna · Interior Designer</span>
-            <h3 id="modalTitle">Project Title</h3>
-          </div>
+        <div class="modal-title-area">
+          <span id="modalMeta">@anilkrishna · Interior Designer</span>
+          <h3 id="modalTitle">Project Title</h3>
         </div>
         <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
       </div>
-      <div class="modal-body">
-        <p class="modal-description" id="modalDescription"></p>
-        
-        <!-- Nested Subfolders Section -->
-        <div class="subfolders-section" id="subfoldersSection">
-          <span class="subfolders-label">Inside This Folder</span>
-          <div class="subfolders-grid" id="subfoldersGrid"></div>
-        </div>
-
-        <!-- Images directly inside the current opened folder -->
-        <div class="modal-stacked-gallery" id="modalGallery"></div>
-      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
@@ -1346,22 +1316,23 @@
     </div>
   </section>
 
-  <!-- GALLERY SECTION (TOP-LEVEL FOLDERS WITH HIERARCHICAL DRILL-DOWN) -->
+  <!-- GALLERY SECTION: IN-PLACE FOLDER DRILL-DOWN -->
   <section class="projects-section" id="gallery">
     <div class="section-header">
-      <div>
-        <h2>Gallery</h2>
-        <p>Curated architectural frames from @anilkrishna</p>
+      <div class="gallery-header-left">
+        <button id="galleryBackBtn" class="gallery-back-btn">← Back</button>
+        <h2 id="galleryTitle">GALLERY</h2>
+        <p id="gallerySubtitle">Curated architectural frames from @anilkrishna</p>
       </div>
     </div>
 
-    <!-- The Javascript will automatically inject top-level folder cards here -->
+    <!-- The Javascript injects folders and images directly into this grid -->
     <div class="projects-grid" id="dynamicGallery">
       <p style="color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;">Loading live projects from Google Drive...</p>
     </div>
   </section>
 
-  <!-- FOOTER: CONTACT DETAILS WITH ICON CAPSULES -->
+  <!-- FOOTER -->
   <footer id="contact">
     <h2>Contact Details</h2>
 
@@ -1404,7 +1375,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: HIERARCHICAL FOLDER TREE + EXPLORER MODAL DRILL-DOWN + INSTANT CACHE -->
+  <!-- SCRIPT: IN-PLACE DRILL-DOWN GALLERY + INSTANT CACHE + FROSTED FOLDER ICONS -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1415,20 +1386,21 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v3";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v5";
       const dynamicGallery = document.getElementById("dynamicGallery");
+      const galleryTitle = document.getElementById("galleryTitle");
+      const gallerySubtitle = document.getElementById("gallerySubtitle");
+      const galleryBackBtn = document.getElementById("galleryBackBtn");
+
       const projectModal = document.getElementById("projectModal");
       const closeModalBtn = document.getElementById("closeModalBtn");
-      const modalBackBtn = document.getElementById("modalBackBtn");
       const modalTitle = document.getElementById("modalTitle");
       const modalMeta = document.getElementById("modalMeta");
-      const modalDescription = document.getElementById("modalDescription");
-      const subfoldersSection = document.getElementById("subfoldersSection");
-      const subfoldersGrid = document.getElementById("subfoldersGrid");
-      const modalGallery = document.getElementById("modalGallery");
+      const modalBody = document.getElementById("modalBody");
 
+      let masterTree = [];
+      let galleryHistoryStack = []; // Breadcrumb stack for ← Back button
       let multiImageCards = [];
-      let navigationStack = []; // Breadcrumb stack for ← Back button
 
       // Helper: recursively grab the first image inside a folder or its children to use as fallback cover
       async function getFirstImageRecursive(folderId) {
@@ -1481,7 +1453,7 @@
             }
           }
 
-          // Only keep folder in the tree if it contains images or subfolders
+          // Keep folder in the tree if it contains images or subfolders
           if (directImages.length > 0 || subfolders.length > 0) {
             return {
               id: folder.id,
@@ -1499,48 +1471,70 @@
         return results.filter(item => item !== null);
       }
 
-      // Render only top-level folders on the website gallery grid
-      function renderGalleryCards(topLevelFolders) {
+      // Main inline gallery render function: renders either top-level folders (root) OR folder contents
+      function renderGalleryView(folderNode = null) {
         dynamicGallery.innerHTML = "";
         multiImageCards = [];
 
-        if (topLevelFolders.length === 0) {
-          dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No project folders found in Google Drive.</p>";
+        // 1. Update Header Text & Back Button
+        if (folderNode === null) {
+          galleryTitle.textContent = "GALLERY";
+          gallerySubtitle.textContent = "Curated architectural frames from @anilkrishna";
+          galleryBackBtn.style.display = "none";
+        } else {
+          galleryTitle.textContent = folderNode.name.toUpperCase();
+          gallerySubtitle.textContent = `Folder location: ${folderNode.path} · @anilkrishna`;
+          galleryBackBtn.style.display = "inline-flex";
+        }
+
+        // 2. Determine what folders/images to display
+        const subfoldersToRender = folderNode === null ? masterTree : (folderNode.subfolders || []);
+        const imagesToRender = folderNode === null ? [] : (folderNode.directImages || []);
+
+        if (subfoldersToRender.length === 0 && imagesToRender.length === 0) {
+          dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>This folder is empty.</p>";
           return;
         }
 
-        topLevelFolders.forEach((project) => {
-          const coverList = project.coverImages;
+        // 3. Render Subfolders as Frosted Glass Folder Cards
+        subfoldersToRender.forEach((subfolder) => {
+          const coverList = subfolder.coverImages || [];
           
           let slidesHtml = "";
           coverList.forEach((file, idx) => {
             const activeClass = idx === 0 ? "active-slide" : "";
             const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
-            slidesHtml += `<img src="${imgUrl}" alt="${project.name} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
+            slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
           });
 
           const card = document.createElement("div");
           card.className = "project-card";
-          
-          // Clicking a top-level card opens the folder drill-down modal
-          card.onclick = () => openFolderInModal(project);
+          card.onclick = () => openInlineFolder(subfolder);
 
           card.innerHTML = `
             <div class="project-img-container">
-              ${slidesHtml}
+              <div class="mac-folder">
+                <div class="folder-tab"></div>
+                <div class="folder-back">
+                  ${slidesHtml}
+                </div>
+                <div class="folder-front">
+                  <div class="folder-handle"></div>
+                </div>
+              </div>
             </div>
             <div class="project-info">
               <div>
                 <span class="project-meta">@anilkrishna · Interior Designer</span>
-                <h3 class="project-title">${project.name}</h3>
+                <h3 class="project-title">${subfolder.name}</h3>
               </div>
-              <span class="project-link">View Project →</span>
+              <span class="project-link">VIEW PROJECT →</span>
             </div>
           `;
           
           dynamicGallery.appendChild(card);
           
-          const slideImgs = card.querySelectorAll(".project-img-container img");
+          const slideImgs = card.querySelectorAll(".folder-back img");
           if (slideImgs.length > 1) {
             multiImageCards.push({
               card: card,
@@ -1554,16 +1548,80 @@
           card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
         });
 
+        // 4. Render Direct Images inside this folder as crisp Image Cards
+        imagesToRender.forEach((file) => {
+          const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+          const card = document.createElement("div");
+          card.className = "project-card";
+          card.onclick = () => openImageLightbox(file.name, imgUrl);
+
+          card.innerHTML = `
+            <div class="project-img-container clean-image-mode">
+              <img src="${imgUrl}" alt="${file.name}" loading="lazy" />
+            </div>
+            <div class="project-info">
+              <div>
+                <span class="project-meta">@anilkrishna · Architectural Frame</span>
+                <h3 class="project-title">${file.name}</h3>
+              </div>
+              <span class="project-link">VIEW FULLSCREEN ↗</span>
+            </div>
+          `;
+
+          dynamicGallery.appendChild(card);
+          card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+          card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+        });
+
         startRandomSlideTicker();
       }
+
+      // Step down into a subfolder inline
+      function openInlineFolder(folderNode) {
+        galleryHistoryStack.push(folderNode);
+        renderGalleryView(folderNode);
+        document.getElementById("gallery").scrollIntoView({ behavior: "smooth" });
+      }
+
+      // Step back up one level in the inline gallery
+      galleryBackBtn.addEventListener("click", () => {
+        if (galleryHistoryStack.length > 0) {
+          galleryHistoryStack.pop();
+          const targetNode = galleryHistoryStack.length === 0 ? null : galleryHistoryStack[galleryHistoryStack.length - 1];
+          renderGalleryView(targetNode);
+          document.getElementById("gallery").scrollIntoView({ behavior: "smooth" });
+        }
+      });
+
+      // Lightbox Viewer for full-resolution architectural images
+      function openImageLightbox(filename, imgUrl) {
+        modalTitle.textContent = filename;
+        modalMeta.textContent = "@anilkrishna · Fullscreen Preview";
+        modalBody.innerHTML = `<img src="${imgUrl}" alt="${filename}" />`;
+        projectModal.classList.add("active");
+        document.body.classList.add("modal-open");
+      }
+
+      function closeModal() {
+        projectModal.classList.remove("active");
+        document.body.classList.remove("modal-open");
+      }
+
+      closeModalBtn.addEventListener("click", closeModal);
+      projectModal.addEventListener("click", (e) => { 
+        if (e.target === projectModal) closeModal(); 
+      });
+      document.addEventListener("keydown", (e) => { 
+        if (e.key === "Escape" && projectModal.classList.contains("active")) closeModal(); 
+      });
 
       // Initialize gallery: check localStorage cache for INSTANT 0ms load, then fetch tree updates silently
       async function buildGallery() {
         const cachedData = localStorage.getItem(CACHE_KEY);
         if (cachedData) {
           try {
-            const parsedTree = JSON.parse(cachedData);
-            renderGalleryCards(parsedTree);
+            masterTree = JSON.parse(cachedData);
+            renderGalleryView(null);
           } catch (e) {
             console.warn("Invalid gallery tree cache, re-fetching...");
           }
@@ -1575,8 +1633,12 @@
           }
 
           const freshTree = await buildFolderTree(MASTER_FOLDER_ID);
+          masterTree = freshTree;
           localStorage.setItem(CACHE_KEY, JSON.stringify(freshTree));
-          renderGalleryCards(freshTree);
+          
+          // Re-render current level
+          const currentLevel = galleryHistoryStack.length === 0 ? null : galleryHistoryStack[galleryHistoryStack.length - 1];
+          renderGalleryView(currentLevel);
         } catch (error) {
           console.error("Error building folder tree:", error);
           if (!cachedData) {
@@ -1584,97 +1646,6 @@
           }
         }
       }
-
-      // Opens a folder inside the Modal and renders its subfolders + direct images
-      function openFolderInModal(folderNode, isDrillDown = false) {
-        if (!isDrillDown) {
-          navigationStack = [folderNode];
-        } else {
-          navigationStack.push(folderNode);
-        }
-
-        renderModalContent(folderNode);
-        projectModal.classList.add("active");
-        document.body.classList.add("modal-open");
-      }
-
-      // Renders the contents of the current folder node inside the modal
-      function renderModalContent(folderNode) {
-        modalTitle.textContent = folderNode.name;
-        modalMeta.textContent = `@anilkrishna · ${folderNode.path}`;
-        modalDescription.textContent = `Folder location: ${folderNode.path}. Select a subfolder below to drill down, or view images inside this folder.`;
-        
-        // Show Back button if we have drilled down past the top-level folder
-        if (navigationStack.length > 1) {
-          modalBackBtn.style.display = "inline-flex";
-        } else {
-          modalBackBtn.style.display = "none";
-        }
-
-        // 1. Render Subfolders Section
-        subfoldersGrid.innerHTML = "";
-        if (folderNode.subfolders && folderNode.subfolders.length > 0) {
-          subfoldersSection.classList.add("active");
-          folderNode.subfolders.forEach(sub => {
-            const countLabel = `${sub.subfolders.length} folder${sub.subfolders.length === 1 ? '' : 's'} · ${sub.directImages.length} img`;
-            const subCard = document.createElement("div");
-            subCard.className = "subfolder-card";
-            subCard.onclick = () => openFolderInModal(sub, true);
-
-            subCard.innerHTML = `
-              <div class="subfolder-icon">📁</div>
-              <div class="subfolder-info">
-                <span class="subfolder-name">${sub.name}</span>
-                <span class="subfolder-count">${countLabel}</span>
-              </div>
-            `;
-            subfoldersGrid.appendChild(subCard);
-          });
-        } else {
-          subfoldersSection.classList.remove("active");
-        }
-
-        // 2. Render Direct Images inside this folder
-        modalGallery.innerHTML = "";
-        if (folderNode.directImages && folderNode.directImages.length > 0) {
-          folderNode.directImages.forEach(file => {
-            const img = document.createElement("img");
-            img.src = `https://lh3.googleusercontent.com/d/${file.id}`; 
-            img.alt = file.name;
-            img.loading = "lazy";
-            modalGallery.appendChild(img);
-          });
-        } else if (folderNode.subfolders.length === 0) {
-          modalGallery.innerHTML = "<p style='color: var(--text-muted);'>No images found directly inside this folder.</p>";
-        }
-      }
-
-      // Go back up one level in the modal folder explorer
-      modalBackBtn.addEventListener("click", () => {
-        if (navigationStack.length > 1) {
-          navigationStack.pop(); // Remove current folder
-          const previousFolder = navigationStack[navigationStack.length - 1];
-          renderModalContent(previousFolder);
-        }
-      });
-
-      function closeModal() {
-        projectModal.classList.remove("active");
-        document.body.classList.remove("modal-open");
-        navigationStack = [];
-      }
-
-      closeModalBtn.addEventListener("click", closeModal);
-      
-      // Close modal on outside background click
-      projectModal.addEventListener("click", (e) => { 
-        if (e.target === projectModal) closeModal(); 
-      });
-      
-      // Close modal on Escape key press
-      document.addEventListener("keydown", (e) => { 
-        if (e.key === "Escape" && projectModal.classList.contains("active")) closeModal(); 
-      });
 
       // Automatically triggers a horizontal slide on a random card in the gallery
       function slideNextImage(cardData) {
@@ -1848,7 +1819,7 @@
       }
 
       // Add hover scale class on links & interactive elements
-      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .modal-close-btn, .subfolder-card, .modal-back-btn");
+      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .modal-close-btn, .gallery-back-btn");
       interactiveElements.forEach(elem => {
         elem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
         elem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
