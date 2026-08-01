@@ -602,7 +602,7 @@
       font-weight: 700;
     }
 
-    /* --- GALLERY SECTION (IN-PLACE DRILL-DOWN FOLDER EXPLORER) --- */
+    /* --- GALLERY SECTION: IN-PLACE FOLDER DRILL-DOWN --- */
     .projects-section {
       padding: 4.5rem 8%;
       border-top: 1px solid var(--border-color);
@@ -691,7 +691,6 @@
       box-shadow: var(--card-shadow-hover);
     }
 
-    /* Padded canvas for macOS Frosted Folder Icon */
     .project-img-container {
       width: 100%;
       height: 300px;
@@ -704,7 +703,39 @@
       padding: 1.5rem;
     }
 
-    /* macOS Frosted Glass Folder Graphic Wrapper */
+    /* 1. Classic Full-Bleed Sliding Image Mode (for Folders without Subfolders) */
+    .project-img-container.standard-slider {
+      padding: 0;
+      background: #f0f0f0;
+    }
+
+    .project-img-container.standard-slider img.slide-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateX(100%);
+      transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+
+    .project-img-container.standard-slider img.slide-img.active-slide {
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    .project-img-container.standard-slider img.slide-img.exit-slide {
+      transform: translateX(-100%);
+      z-index: 1;
+    }
+
+    .project-card:hover .project-img-container.standard-slider img.slide-img.active-slide {
+      transform: translateX(0) scale(1.06);
+    }
+
+    /* 2. macOS Frosted Folder Graphic Mode (for Folders WITH Subfolders) */
     .mac-folder {
       position: relative;
       width: 100%;
@@ -744,7 +775,7 @@
       z-index: 1;
     }
 
-    .folder-back img {
+    .folder-back img.slide-img {
       position: absolute;
       top: 0;
       left: 0;
@@ -756,17 +787,17 @@
       will-change: transform;
     }
 
-    .folder-back img.active-slide {
+    .folder-back img.slide-img.active-slide {
       transform: translateX(0);
       z-index: 2;
     }
 
-    .folder-back img.exit-slide {
+    .folder-back img.slide-img.exit-slide {
       transform: translateX(-100%);
       z-index: 1;
     }
 
-    .project-card:hover .folder-back img.active-slide {
+    .project-card:hover .folder-back img.slide-img.active-slide {
       transform: translateX(0) scale(1.08);
     }
 
@@ -795,7 +826,7 @@
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
-    /* Clean full-bleed container when rendering Image Cards inside a folder */
+    /* 3. Clean Full-Bleed Container for Direct Image Items inside an Opened Folder */
     .project-img-container.clean-image-mode {
       padding: 0;
       background: #f0f0f0;
@@ -1375,7 +1406,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: IN-PLACE DRILL-DOWN GALLERY + INSTANT CACHE + FROSTED FOLDER ICONS -->
+  <!-- SCRIPT: IN-PLACE DRILL-DOWN GALLERY + CONDITIONAL FOLDER RENDERING + INSTANT CACHE -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1386,7 +1417,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v5";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v6";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1496,45 +1527,63 @@
           return;
         }
 
-        // 3. Render Subfolders as Frosted Glass Folder Cards
+        // 3. Render Folders conditionally based on subfolder presence
         subfoldersToRender.forEach((subfolder) => {
           const coverList = subfolder.coverImages || [];
+          const hasSubfolders = subfolder.subfolders && subfolder.subfolders.length > 0;
           
           let slidesHtml = "";
           coverList.forEach((file, idx) => {
             const activeClass = idx === 0 ? "active-slide" : "";
             const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
-            slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
+            slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="slide-img ${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
           });
 
           const card = document.createElement("div");
           card.className = "project-card";
           card.onclick = () => openInlineFolder(subfolder);
 
-          card.innerHTML = `
-            <div class="project-img-container">
-              <div class="mac-folder">
-                <div class="folder-tab"></div>
-                <div class="folder-back">
-                  ${slidesHtml}
-                </div>
-                <div class="folder-front">
-                  <div class="folder-handle"></div>
+          if (hasSubfolders) {
+            // macOS Frosted Glass Folder Icon (for folders containing subfolders)
+            card.innerHTML = `
+              <div class="project-img-container">
+                <div class="mac-folder">
+                  <div class="folder-tab"></div>
+                  <div class="folder-back">
+                    ${slidesHtml}
+                  </div>
+                  <div class="folder-front">
+                    <div class="folder-handle"></div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="project-info">
-              <div>
-                <span class="project-meta">@anilkrishna · Interior Designer</span>
-                <h3 class="project-title">${subfolder.name}</h3>
+              <div class="project-info">
+                <div>
+                  <span class="project-meta">@anilkrishna · Interior Designer</span>
+                  <h3 class="project-title">${subfolder.name}</h3>
+                </div>
+                <span class="project-link">VIEW PROJECT →</span>
               </div>
-              <span class="project-link">VIEW PROJECT →</span>
-            </div>
-          `;
+            `;
+          } else {
+            // Classic Full-Bleed Sliding Image Mode (for leaf folders without subfolders)
+            card.innerHTML = `
+              <div class="project-img-container standard-slider">
+                ${slidesHtml}
+              </div>
+              <div class="project-info">
+                <div>
+                  <span class="project-meta">@anilkrishna · Interior Designer</span>
+                  <h3 class="project-title">${subfolder.name}</h3>
+                </div>
+                <span class="project-link">VIEW PROJECT →</span>
+              </div>
+            `;
+          }
           
           dynamicGallery.appendChild(card);
           
-          const slideImgs = card.querySelectorAll(".folder-back img");
+          const slideImgs = card.querySelectorAll("img.slide-img");
           if (slideImgs.length > 1) {
             multiImageCards.push({
               card: card,
