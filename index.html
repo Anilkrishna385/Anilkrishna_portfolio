@@ -673,7 +673,7 @@
       gap: 2.2rem;
       max-width: 1250px;
       margin: 0 auto;
-      align-items: stretch; /* Keeps row heights balanced and aligned */
+      align-items: stretch;
     }
 
     /* --- CLASSIC BOX CARD (For Folders with ONLY Images or Direct Image Files) --- */
@@ -770,7 +770,7 @@
       opacity: 0.6;
     }
 
-    /* --- STANDALONE FROSTED FOLDER ICON (FOR FOLDERS WITH SUBFOLDERS) --- */
+    /* --- STANDALONE FROSTED FOLDER ICON (ONLY FOR FOLDERS WITH SUBFOLDERS) --- */
     .folder-only-item {
       display: flex;
       flex-direction: column;
@@ -780,12 +780,12 @@
       cursor: pointer;
       user-select: none;
       padding: 1.8rem 1.2rem;
-      min-height: 420px; /* Matches the total vertical footprint of adjacent .project-card elements */
+      min-height: 420px;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .folder-only-item:hover {
-      transform: translateY(-8px);
+      transform: translateY(-6px);
     }
 
     .folder-only-label {
@@ -821,7 +821,7 @@
       border-bottom: none;
     }
 
-    /* Back Layer: Crisp White Base */
+    /* Back Layer / Card Sheet: Crisply Slides Out Vertically on Hover! */
     .folder-back {
       position: absolute;
       top: 12px;
@@ -834,9 +834,15 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       overflow: hidden;
       z-index: 1;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
     }
 
-    /* Sliding Cover Images inside Folder Back */
+    /* Tactile "Card pulling out slightly" hover effect */
+    .folder-only-item:hover .folder-back {
+      transform: translateY(-18px);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.12);
+    }
+
     .folder-back img.slide-img {
       position: absolute;
       top: 0;
@@ -860,7 +866,7 @@
     }
 
     .folder-only-item:hover .folder-back img.slide-img.active-slide {
-      transform: translateX(0) scale(1.08);
+      transform: translateX(0) scale(1.06);
     }
 
     /* Front Frosted Pocket (Opacity tuned to 0.52 so sliding artwork inside is clearly visible!) */
@@ -903,7 +909,7 @@
       position: absolute;
       width: 260px;
       height: 190px;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .folder-stack-layer.layer-3 {
@@ -924,16 +930,17 @@
       z-index: 3;
     }
 
+    /* Fanning layers outward and pulling top card out slightly on hover */
     .folder-only-item:hover .folder-stack-layer.layer-3 {
-      transform: translate(22px, -20px) scale(0.9);
+      transform: translate(24px, -24px) scale(0.9);
     }
 
     .folder-only-item:hover .folder-stack-layer.layer-2 {
-      transform: translate(11px, -10px) scale(0.95);
+      transform: translate(12px, -12px) scale(0.95);
     }
 
     .folder-only-item:hover .folder-stack-layer.layer-1 {
-      transform: translate(0, 0) scale(1.04);
+      transform: translate(0, 0) scale(1);
     }
 
     /* Full-Bleed Container for Direct Image Items inside an Opened Folder */
@@ -956,7 +963,7 @@
       transform: scale(1.06);
     }
 
-    /* --- FULLSCREEN IMAGE LIGHTBOX MODAL --- */
+    /* --- FULLSCREEN STACKED VERTICAL-SCROLLING MODAL PREVIEW --- */
     .project-modal-overlay {
       position: fixed;
       top: 0;
@@ -969,11 +976,12 @@
       z-index: 10000;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      overflow-y: auto;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.35s ease;
-      padding: 2rem 5%;
+      padding: 3rem 5%;
     }
 
     .project-modal-overlay.active {
@@ -986,7 +994,7 @@
       border-radius: var(--radius-lg);
       max-width: 1100px;
       width: 100%;
-      max-height: 90vh;
+      margin: auto 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -1000,7 +1008,12 @@
     }
 
     .modal-header {
-      padding: 1.2rem 2rem;
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 1.4rem 2.5rem;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
@@ -1010,7 +1023,7 @@
 
     .modal-title-area h3 {
       font-family: var(--font-heading);
-      font-size: 1.8rem;
+      font-size: 2.2rem;
       font-weight: 700;
       text-transform: uppercase;
       line-height: 1;
@@ -1027,8 +1040,8 @@
     .modal-close-btn {
       background: #f0f0f0;
       border: 1px solid var(--border-color);
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -1046,20 +1059,34 @@
       transform: rotate(90deg);
     }
 
+    /* Stacked Editorial Images for Vertical Scrolling Preview */
     .modal-body {
-      padding: 1.5rem;
+      padding: 2.5rem;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: auto;
-      background: #0f0f0f;
+      flex-direction: column;
+      gap: 2.5rem;
     }
 
-    .modal-body img {
-      max-width: 100%;
-      max-height: 75vh;
+    .modal-description {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .modal-stacked-gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .modal-stacked-gallery img {
+      width: 100%;
+      height: auto;
       border-radius: var(--radius-sm);
-      object-fit: contain;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      object-fit: cover;
     }
 
     /* --- FOOTER --- */
@@ -1195,7 +1222,7 @@
   <!-- SOLID BLACK DOT CURSOR ELEMENT -->
   <div id="cursorDot" aria-hidden="true"></div>
 
-  <!-- FULLSCREEN IMAGE LIGHTBOX MODAL -->
+  <!-- FULLSCREEN STACKED VERTICAL SCROLLING PREVIEW MODAL -->
   <div class="project-modal-overlay" id="projectModal">
     <div class="project-modal-content">
       <div class="modal-header">
@@ -1205,7 +1232,10 @@
         </div>
         <button class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">&times;</button>
       </div>
-      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-body">
+        <p class="modal-description" id="modalDescription"></p>
+        <div class="modal-stacked-gallery" id="modalGallery"></div>
+      </div>
     </div>
   </div>
 
@@ -1475,7 +1505,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: RULE-BASED FOLDER vs CARD RENDERING + IN-PLACE DRILL-DOWN + INSTANT CACHE -->
+  <!-- SCRIPT: INSTANT 0ms CACHE + STACKED SCROLLING MODAL PREVIEW + CARD PULL-OUT HOVER -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1486,7 +1516,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v9";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v10";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1496,7 +1526,8 @@
       const closeModalBtn = document.getElementById("closeModalBtn");
       const modalTitle = document.getElementById("modalTitle");
       const modalMeta = document.getElementById("modalMeta");
-      const modalBody = document.getElementById("modalBody");
+      const modalDescription = document.getElementById("modalDescription");
+      const modalGallery = document.getElementById("modalGallery");
 
       let masterTree = [];
       let galleryHistoryStack = [];
@@ -1595,7 +1626,7 @@
           return;
         }
 
-        // 2. Render Folders conditionally based on rule: ONLY IMAGES = Box Card, HAS SUBFOLDERS = Standalone Folder Icon
+        // 2. Render Folders conditionally: ONLY IMAGES = Box Card, HAS SUBFOLDERS = Standalone Folder Icon
         subfoldersToRender.forEach((subfolder) => {
           const coverList = subfolder.coverImages || [];
           const hasSubfolders = subfolder.subfolders && subfolder.subfolders.length > 0;
@@ -1609,7 +1640,7 @@
           });
 
           if (hasSubfolders) {
-            // RULE 2: HAS SUBFOLDERS -> Show ONLY the Frosted Glass Folder Icon (No Box Card wrapper!)
+            // HAS SUBFOLDERS -> Show ONLY the Frosted Glass Folder Icon (No Box Card wrapper!)
             const folderElem = document.createElement("div");
             folderElem.className = "folder-only-item";
             folderElem.onclick = () => openInlineFolder(subfolder);
@@ -1679,10 +1710,12 @@
             folderElem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
             folderElem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
           } else {
-            // RULE 1: ONLY IMAGES (No Subfolders) -> Show Classic Box Card with Sliding Feature
+            // ONLY IMAGES (No Subfolders) -> Show Classic Box Card with Sliding Feature
             const card = document.createElement("div");
             card.className = "project-card";
-            card.onclick = () => openInlineFolder(subfolder);
+            
+            // Clicking opens the vertically scrolling stacked gallery modal
+            card.onclick = () => openStackedGalleryModal(subfolder.name, subfolder.path, subfolder.directImages || coverList);
 
             card.innerHTML = `
               <div class="project-img-container">
@@ -1719,7 +1752,7 @@
           const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
           const card = document.createElement("div");
           card.className = "project-card";
-          card.onclick = () => openImageLightbox(file.name, imgUrl);
+          card.onclick = () => openStackedGalleryModal(file.name, folderNode ? folderNode.path : "Gallery", [file]);
 
           card.innerHTML = `
             <div class="project-img-container clean-image-mode">
@@ -1759,11 +1792,22 @@
         }
       });
 
-      // Lightbox Viewer for full-resolution architectural images
-      function openImageLightbox(filename, imgUrl) {
-        modalTitle.textContent = filename;
-        modalMeta.textContent = "@anilkrishna · Fullscreen Preview";
-        modalBody.innerHTML = `<img src="${imgUrl}" alt="${filename}" />`;
+      // Stacked Editorial Lightbox Modal (Scrolls vertically through all project images!)
+      function openStackedGalleryModal(projectTitle, projectPath, imageFiles) {
+        modalTitle.textContent = projectTitle;
+        modalMeta.textContent = `@anilkrishna · ${projectPath}`;
+        modalDescription.textContent = `Full architectural execution and spatial geometry mapping for ${projectTitle}.`;
+        
+        modalGallery.innerHTML = "";
+        imageFiles.forEach(file => {
+          const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+          const img = document.createElement("img");
+          img.src = imgUrl;
+          img.alt = file.name || projectTitle;
+          img.loading = "lazy";
+          modalGallery.appendChild(img);
+        });
+
         projectModal.classList.add("active");
         document.body.classList.add("modal-open");
       }
@@ -1781,7 +1825,7 @@
         if (e.key === "Escape" && projectModal.classList.contains("active")) closeModal(); 
       });
 
-      // Initialize gallery: check localStorage cache for INSTANT 0ms load, then fetch tree updates silently
+      // Initialize gallery: 0ms INSTANT load from localStorage cache, then silent background sync
       async function buildGallery() {
         const cachedData = localStorage.getItem(CACHE_KEY);
         if (cachedData) {
@@ -1802,7 +1846,6 @@
           masterTree = freshTree;
           localStorage.setItem(CACHE_KEY, JSON.stringify(freshTree));
           
-          // Re-render current level
           const currentLevel = galleryHistoryStack.length === 0 ? null : galleryHistoryStack[galleryHistoryStack.length - 1];
           renderGalleryView(currentLevel);
         } catch (error) {
