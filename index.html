@@ -806,22 +806,24 @@
       justify-content: flex-end;
     }
 
+    /* Top Left Folder Tab: Warm Golden-Yellow Architectural Lighting Shading */
     .folder-tab {
       position: absolute;
       top: 0;
       left: 0;
       width: 44%;
       height: 38px;
-      background: rgba(255, 255, 255, 0.85);
+      background: linear-gradient(135deg, rgba(255, 240, 175, 0.92) 0%, rgba(255, 220, 130, 0.82) 100%);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-radius: 16px 16px 0 0;
       z-index: 3;
-      border: 1.5px solid rgba(0, 0, 0, 0.09);
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
       border-bottom: none;
+      box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.6);
     }
 
-    /* Back Layer / Card Sheet: Crisply Slides Out Vertically on Hover! */
+    /* Back Card Sheet: Subtle Yellow-Cream Tint + Crisply Slides Out Vertically on Hover! */
     .folder-back {
       position: absolute;
       top: 12px;
@@ -829,18 +831,18 @@
       width: 93%;
       height: 90%;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1.5px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      background: linear-gradient(135deg, rgba(255, 248, 220, 0.96) 0%, rgba(255, 232, 170, 0.9) 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px rgba(245, 185, 45, 0.14);
       overflow: hidden;
       z-index: 1;
       transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
     }
 
-    /* Tactile "Card pulling out slightly" hover effect */
+    /* Tactile "Card pulling out slightly" hover effect with golden yellow glow */
     .folder-only-item:hover .folder-back {
       transform: translateY(-18px);
-      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 18px 38px rgba(245, 185, 45, 0.26);
     }
 
     .folder-back img.slide-img {
@@ -869,17 +871,17 @@
       transform: translateX(0) scale(1.06);
     }
 
-    /* Front Frosted Pocket (Opacity tuned to 0.52 so sliding artwork inside is clearly visible!) */
+    /* Front Frosted Pocket (Warm Amber-Yellow Shading & Semi-visible overlay!) */
     .folder-front {
       position: relative;
       width: 100%;
       height: 82%;
       border-radius: 20px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(240, 246, 255, 0.42) 100%);
-      backdrop-filter: blur(8px) saturate(160%);
-      -webkit-backdrop-filter: blur(8px) saturate(160%);
+      background: linear-gradient(135deg, rgba(255, 244, 190, 0.68) 0%, rgba(255, 222, 115, 0.52) 100%);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
       border: 1.5px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+      box-shadow: 0 12px 30px rgba(245, 185, 45, 0.16), inset 0 1px 12px rgba(255, 255, 255, 0.5);
       z-index: 3;
       display: flex;
       align-items: flex-end;
@@ -892,7 +894,7 @@
       height: 8px;
       background: rgba(255, 255, 255, 0.95);
       border-radius: 999px;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+      box-shadow: inset 0 1px 2px rgba(180, 130, 20, 0.25);
     }
 
     /* 3-Folder Stacked Deck (For Standalone Folders with Multiple Subfolders Inside) */
@@ -930,7 +932,6 @@
       z-index: 3;
     }
 
-    /* Fanning layers outward and pulling top card out slightly on hover */
     .folder-only-item:hover .folder-stack-layer.layer-3 {
       transform: translate(24px, -24px) scale(0.9);
     }
@@ -1059,7 +1060,6 @@
       transform: rotate(90deg);
     }
 
-    /* Stacked Editorial Images for Vertical Scrolling Preview */
     .modal-body {
       padding: 2.5rem;
       display: flex;
@@ -1505,7 +1505,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: INSTANT 0ms CACHE + STACKED SCROLLING MODAL PREVIEW + CARD PULL-OUT HOVER -->
+  <!-- SCRIPT: RULE-BASED FOLDER vs CARD RENDERING + IN-PLACE DRILL-DOWN + INSTANT CACHE -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1516,7 +1516,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v10";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v11";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
