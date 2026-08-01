@@ -50,7 +50,8 @@
     @media (pointer: fine) {
       body, a, button, .exp-card, .software-item, .project-card, .folder-only-item,
       .modal-close-btn, .project-modal-overlay, .project-modal-content,
-      .modal-stacked-gallery img, .modal-stacked-gallery canvas, .gallery-back-btn {
+      .modal-stacked-gallery img, .modal-stacked-gallery canvas, .modal-stacked-gallery iframe,
+      .gallery-back-btn {
         cursor: none !important;
       }
     }
@@ -679,7 +680,7 @@
       align-items: stretch;
     }
 
-    /* --- CLASSIC BOX CARD (For Folders with ONLY Images or Direct Image Files) --- */
+    /* --- CLASSIC BOX CARD --- */
     .project-card {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
@@ -773,7 +774,7 @@
       opacity: 0.6;
     }
 
-    /* --- STANDALONE FROSTED FOLDER ICON (ONLY FOR FOLDERS WITH SUBFOLDERS) --- */
+    /* --- STANDALONE FROSTED FOLDER ICON --- */
     .folder-only-item {
       display: flex;
       flex-direction: column;
@@ -998,7 +999,6 @@
       border-radius: var(--radius-lg);
       max-width: 1100px;
       width: 100%;
-      max-height: 90vh;
       margin: auto 0;
       display: flex;
       flex-direction: column;
@@ -1116,6 +1116,14 @@
       object-fit: contain;
       display: block;
       background: #ffffff;
+    }
+
+    .modal-stacked-gallery iframe {
+      width: 100%;
+      min-height: 82vh;
+      border: none;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     /* --- FOOTER --- */
@@ -1534,7 +1542,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: INSTANT 0ms CACHE + MULTI-PAGE STACKED PDF SCROLLING + TACTILE CARD PULL-OUT HOVER -->
+  <!-- SCRIPT: INSTANT 0ms CACHE + OFFICIAL API MEDIA PDF FETCH + FULL-DOCUMENT IFRAME FALLBACK -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // Configure Mozilla PDF.js Worker
@@ -1550,7 +1558,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v14";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v15";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1843,11 +1851,12 @@
           if (isPdf) {
             let renderedPdf = false;
             try {
-              // Attempt to fetch and render multi-page PDF via PDF.js into stacked high-res images
-              const pdfUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+              // DOWNLOAD RAW BINARY PDF USING OFFICIAL GOOGLE DRIVE API v3 MEDIA ENDPOINT (CORS COMPLIANT WITH API KEY!)
+              const pdfUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
               const loadingTask = pdfjsLib.getDocument({ url: pdfUrl, withCredentials: false });
               const pdf = await loadingTask.promise;
 
+              // LOOP THROUGH EVERY SINGLE PAGE AND RENDER IT VERTICALLY IN THE STACKED GALLERY
               for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                 const page = await pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 2.0 });
@@ -1868,16 +1877,16 @@
               }
               renderedPdf = true;
             } catch (err) {
-              console.warn("PDF.js direct parse failed, rendering high-res Drive thumbnail stack...", err);
+              console.warn("PDF.js binary fetch failed, mounting bulletproof Full-Document Iframe Reader...", err);
             }
 
+            // BULLETPROOF FALLBACK: IF STRICT AD-BLOCKER/FIREWALL BLOCKS CANVAS, MOUNT A FULL-DOCUMENT IFRAME
             if (!renderedPdf) {
-              const imgUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600`;
-              const img = document.createElement("img");
-              img.src = imgUrl;
-              img.alt = file.name;
-              img.loading = "lazy";
-              modalGallery.appendChild(img);
+              const iframe = document.createElement("iframe");
+              iframe.src = `https://drive.google.com/file/d/${file.id}/preview`;
+              iframe.title = file.name;
+              iframe.allow = "autoplay";
+              modalGallery.appendChild(iframe);
             }
           } else {
             // STANDARD ARCHITECTURAL IMAGE FRAME
