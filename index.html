@@ -712,10 +712,11 @@
     }
 
     .project-title {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 1rem;
       color: var(--text-main);
+      line-height: 1.35;
     }
 
     .project-link {
@@ -1228,7 +1229,7 @@
     </div>
   </section>
 
-  <!-- GALLERY SECTION (AUTOMATED INJECTION) -->
+  <!-- GALLERY SECTION (AUTOMATED RECURSIVE INJECTION) -->
   <section class="projects-section" id="gallery">
     <div class="section-header">
       <div>
@@ -1267,7 +1268,7 @@
       <!-- 3. LinkedIn Capsule -->
       <a href="https://linkedin.com" target="_blank" rel="noreferrer" class="contact-capsule">
         <svg viewBox="0 0 24 24">
-          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
         </svg>
         LinkedIn
       </a>
@@ -1286,7 +1287,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + RANDOMIZED SLIDING CARDS + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
+  <!-- SCRIPT: LIVE RECURSIVE GOOGLE DRIVE FETCH + SMART COVER LOGIC + RANDOMIZED SLIDING CARDS + SOLID DOT CURSOR -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1308,55 +1309,106 @@
       // Array to keep track of cards that have multiple images for randomized sliding
       const multiImageCards = [];
 
-      // Initialize the automated gallery on page load
+      // Helper: Recursively collect ALL images from a folder and its nested subfolders
+      async function fetchAllFolderImagesRecursive(folderId) {
+        let allImages = [];
+        // 1. Fetch direct images in this folder
+        const imagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
+        const imagesRes = await fetch(imagesUrl);
+        const imagesData = await imagesRes.json();
+        if (imagesData.files) {
+          allImages = allImages.concat(imagesData.files);
+        }
+
+        // 2. Fetch any subfolders and recursively gather their images
+        const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
+        const foldersRes = await fetch(foldersUrl);
+        const foldersData = await foldersRes.json();
+        if (foldersData.files) {
+          for (const sub of foldersData.files) {
+            const subImages = await fetchAllFolderImagesRecursive(sub.id);
+            allImages = allImages.concat(subImages);
+          }
+        }
+        return allImages;
+      }
+
+      // Recursively scan folder hierarchy and create cards for any folder containing images
+      async function getProjectFolders(folderId, pathPrefix = "") {
+        let results = [];
+        const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
+        const res = await fetch(foldersUrl);
+        const data = await res.json();
+
+        if (!data.files || data.files.length === 0) {
+          return results;
+        }
+
+        for (const folder of data.files) {
+          const fullPath = pathPrefix ? `${pathPrefix} - ${folder.name}` : folder.name;
+
+          // Check if this folder directly contains images (e.g. 1 cover image, or multiple cover images)
+          const directImagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'+and+trashed=false&fields=files(id,name)&pageSize=10&key=${GOOGLE_API_KEY}`;
+          const directImagesRes = await fetch(directImagesUrl);
+          const directImagesData = await directImagesRes.json();
+          let coverImages = directImagesData.files || [];
+
+          // If no direct images are present, check recursively inside subfolders so leaf projects aren't missed
+          if (coverImages.length === 0) {
+            const recursiveImages = await fetchAllFolderImagesRecursive(folder.id);
+            if (recursiveImages.length > 0) {
+              coverImages = recursiveImages.slice(0, 10);
+            }
+          }
+
+          // If this folder (or any of its subfolders) has images, register it as a project card
+          if (coverImages.length > 0) {
+            results.push({
+              id: folder.id,
+              name: folder.name,
+              path: fullPath,
+              images: coverImages
+            });
+          }
+
+          // Continue traversing subfolders
+          const subfolderResults = await getProjectFolders(folder.id, fullPath);
+          results = results.concat(subfolderResults);
+        }
+        return results;
+      }
+
+      // Initialize the automated recursive gallery on page load
       async function buildGallery() {
         try {
-          // 1. Find all subfolders inside the Master Folder
-          const foldersUrl = `https://www.googleapis.com/drive/v3/files?q='${MASTER_FOLDER_ID}'+in+parents+and+mimeType='application/vnd.google-apps.folder'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
-          const folderRes = await fetch(foldersUrl);
-          const folderData = await folderRes.json();
+          dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%; padding: 2rem;'>Scanning Google Drive folder hierarchy...</p>";
 
-          if (folderData.error) {
-            dynamicGallery.innerHTML = `<p style='color: red; text-align: center; width: 100%;'>Google Drive Error: ${folderData.error.message}</p>`;
+          const projectFolders = await getProjectFolders(MASTER_FOLDER_ID);
+
+          if (projectFolders.length === 0) {
+            dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No project folders containing images found in Google Drive.</p>";
             return;
           }
 
-          if (!folderData.files || folderData.files.length === 0) {
-            dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>No projects found in the master folder. Please add subfolders to Google Drive.</p>";
-            return;
-          }
+          dynamicGallery.innerHTML = ""; // Clear loading text
 
-          dynamicGallery.innerHTML = ""; // Clear the "Loading..." text
-
-          // 2. Loop through each folder to build a card
-          for (const folder of folderData.files) {
-            
-            // Ask Google Drive for up to 10 images from this folder for the auto-sliding preview
-            const imagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&pageSize=10&key=${GOOGLE_API_KEY}`;
-            const imagesRes = await fetch(imagesUrl);
-            const imagesData = await imagesRes.json();
-            
-            const fileList = imagesData.files || [];
+          for (const project of projectFolders) {
+            const fileList = project.images;
             
             // Build stacked image HTML layers for horizontal sliding transitions
             let slidesHtml = "";
-            if (fileList.length > 0) {
-              fileList.forEach((file, idx) => {
-                const activeClass = idx === 0 ? "active-slide" : "";
-                const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
-                slidesHtml += `<img src="${imgUrl}" alt="${folder.name} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
-              });
-            } else {
-              // Fallback if folder is empty
-              slidesHtml = `<img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Fallback Portfolio Image" class="active-slide" />`;
-            }
+            fileList.forEach((file, idx) => {
+              const activeClass = idx === 0 ? "active-slide" : "";
+              const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+              slidesHtml += `<img src="${imgUrl}" alt="${project.path} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
+            });
 
-            // 3. Construct the HTML card
+            // Construct the HTML card with the full hierarchical breadcrumb path
             const card = document.createElement("div");
             card.className = "project-card";
             
-            // When card is clicked, pass the Folder ID and Folder Name to the modal
-            card.onclick = () => openModal(folder.id, folder.name);
+            // When clicked, open modal and fetch ALL images recursively (so cover + subfolders are shown)
+            card.onclick = () => openModal(project.id, project.path);
 
             card.innerHTML = `
               <div class="project-img-container">
@@ -1365,7 +1417,7 @@
               <div class="project-info">
                 <div>
                   <span class="project-meta">@anilkrishna · Interior Designer</span>
-                  <h3 class="project-title">${folder.name}</h3>
+                  <h3 class="project-title">${project.path}</h3>
                 </div>
                 <span class="project-link">View Project →</span>
               </div>
@@ -1373,7 +1425,7 @@
             
             dynamicGallery.appendChild(card);
             
-            // If the card has more than 1 image, register it for randomized sliding
+            // Register multi-image cards for randomized horizontal sliding
             const slideImgs = card.querySelectorAll(".project-img-container img");
             if (slideImgs.length > 1) {
               multiImageCards.push({
@@ -1389,7 +1441,7 @@
             card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
           }
 
-          // 4. Start the randomized slide ticker once all cards are built
+          // Start the randomized slide ticker once all cards are built
           startRandomSlideTicker();
         } catch (error) {
           console.error("Error building gallery:", error);
@@ -1438,25 +1490,24 @@
         setTimeout(triggerOrganicSlide, 2000);
       }
 
-      // Open the modal and fetch all images for the clicked folder
-      async function openModal(folderId, folderName) {
-        modalTitle.textContent = folderName;
+      // Open the modal and recursively fetch ALL images inside the folder and subfolders
+      async function openModal(folderId, projectPath) {
+        modalTitle.textContent = projectPath;
         modalMeta.textContent = "@anilkrishna · Interior Designer";
-        modalDescription.textContent = "Loading live images from " + folderName + "..."; 
+        modalDescription.textContent = "Loading live images from " + projectPath + "..."; 
         modalGallery.innerHTML = "";
 
         projectModal.classList.add("active");
         document.body.classList.add("modal-open");
 
         try {
-          const fetchUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&key=${GOOGLE_API_KEY}`;
-          const response = await fetch(fetchUrl);
-          const driveData = await response.json();
+          // Recursively collect every image in this project folder and its subfolders
+          const allProjectImages = await fetchAllFolderImagesRecursive(folderId);
 
           modalDescription.textContent = "Full architectural execution and spatial geometry mapping."; 
 
-          if (driveData.files && driveData.files.length > 0) {
-            driveData.files.forEach(file => {
+          if (allProjectImages.length > 0) {
+            allProjectImages.forEach(file => {
               const img = document.createElement("img");
               img.src = `https://lh3.googleusercontent.com/d/${file.id}`; 
               img.alt = file.name;
