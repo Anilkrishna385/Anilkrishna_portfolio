@@ -1118,14 +1118,6 @@
       background: #ffffff;
     }
 
-    .modal-stacked-gallery iframe {
-      width: 100%;
-      min-height: 82vh;
-      border: none;
-      border-radius: var(--radius-sm);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    }
-
     /* --- FOOTER --- */
     footer {
       padding: 4.5rem 8% 4rem;
@@ -1542,7 +1534,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: INSTANT 0ms CACHE + OFFICIAL API MEDIA PDF FETCH + FULL-DOCUMENT IFRAME FALLBACK -->
+  <!-- SCRIPT: 0ms INSTANT PDF ENGINE + SILENT BACKGROUND PRELOADER + CARD PULL-OUT HOVER -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // Configure Mozilla PDF.js Worker
@@ -1558,7 +1550,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v15";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v16";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1574,6 +1566,41 @@
       let masterTree = [];
       let galleryHistoryStack = [];
       let multiImageCards = [];
+
+      // IN-MEMORY INSTANT PDF PAGE CACHE: Stores pre-rendered base64 page images!
+      window.PDF_PAGE_CACHE = window.PDF_PAGE_CACHE || {};
+
+      // SILENT BACKGROUND PRELOADER: Renders PDF pages silently without blocking the user!
+      async function silentPdfPreload(files) {
+        if (!window.pdfjsLib) return;
+        for (const file of files) {
+          const isPdf = file.mimeType === "application/pdf" || (file.name && file.name.toLowerCase().endsWith(".pdf"));
+          if (isPdf && !window.PDF_PAGE_CACHE[file.id]) {
+            try {
+              const pdfUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
+              const loadingTask = pdfjsLib.getDocument({ url: pdfUrl, withCredentials: false });
+              const pdf = await loadingTask.promise;
+              const renderedPages = [];
+
+              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.8 });
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                renderedPages.push(canvas.toDataURL("image/jpeg", 0.88));
+              }
+
+              window.PDF_PAGE_CACHE[file.id] = renderedPages;
+            } catch (err) {
+              console.warn("Silent PDF preload skipped for:", file.name);
+            }
+          }
+        }
+      }
 
       // Helper: recursively grab the first image or PDF thumbnail inside a folder to use as fallback cover
       async function getFirstImageRecursive(folderId) {
@@ -1815,6 +1842,10 @@
         });
 
         startRandomSlideTicker();
+
+        // 4. TRIGGER SILENT BACKGROUND PDF PRELOADER ON VIEW RENDER!
+        silentPdfPreload(imagesToRender);
+        subfoldersToRender.forEach(sub => silentPdfPreload(sub.directImages || []));
       }
 
       // Step down into a subfolder inline
@@ -1834,59 +1865,69 @@
         }
       });
 
-      // Stacked Editorial Modal (Scrolls vertically through images AND Multi-Page PDFs!)
-      async function openStackedGalleryModal(projectTitle, projectPath, files) {
+      // 0ms INSTANT STACKED MODAL (Opens instantly without any loading text!)
+      function openStackedGalleryModal(projectTitle, projectPath, files) {
         modalTitle.textContent = projectTitle;
         modalMeta.textContent = `@anilkrishna · ${projectPath}`;
         modalDescription.textContent = `Full architectural execution and spatial geometry mapping for ${projectTitle}.`;
         
-        modalGallery.innerHTML = "<p style='color: var(--text-muted); padding: 1rem;'>Loading stacked frames...</p>";
+        modalGallery.innerHTML = "";
         projectModal.classList.add("active");
         document.body.classList.add("modal-open");
 
-        modalGallery.innerHTML = "";
-        for (const file of files) {
+        files.forEach(async (file) => {
           const isPdf = file.mimeType === "application/pdf" || (file.name && file.name.toLowerCase().endsWith(".pdf"));
           
           if (isPdf) {
-            let renderedPdf = false;
+            // A) CHECK 0ms INSTANT CACHE FIRST
+            if (window.PDF_PAGE_CACHE[file.id]) {
+              window.PDF_PAGE_CACHE[file.id].forEach((imgDataUrl, i) => {
+                const pageImg = document.createElement("img");
+                pageImg.src = imgDataUrl;
+                pageImg.alt = `${file.name} - Page ${i + 1}`;
+                modalGallery.appendChild(pageImg);
+              });
+              return;
+            }
+
+            // B) 0ms INSTANT PAGE 1 FALLBACK (Never show loading text while rendering remaining pages!)
+            const page1Thumb = document.createElement("img");
+            page1Thumb.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1600`;
+            page1Thumb.alt = `${file.name} - Page 1`;
+            modalGallery.appendChild(page1Thumb);
+
+            // C) SILENT BACKGROUND RENDER FOR REMAINING PAGES
             try {
-              // DOWNLOAD RAW BINARY PDF USING OFFICIAL GOOGLE DRIVE API v3 MEDIA ENDPOINT (CORS COMPLIANT WITH API KEY!)
               const pdfUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
               const loadingTask = pdfjsLib.getDocument({ url: pdfUrl, withCredentials: false });
               const pdf = await loadingTask.promise;
+              const renderedPages = [];
 
-              // LOOP THROUGH EVERY SINGLE PAGE AND RENDER IT VERTICALLY IN THE STACKED GALLERY
               for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                 const page = await pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 2.0 });
-
                 const canvas = document.createElement("canvas");
                 const context = canvas.getContext("2d");
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const pageUrl = canvas.toDataURL("image/jpeg", 0.92);
+                renderedPages.push(pageUrl);
 
-                // Render page as image frame matching standard image styling
-                const pageImg = document.createElement("img");
-                pageImg.src = canvas.toDataURL("image/jpeg", 0.92);
-                pageImg.alt = `${file.name} - Page ${pageNum}`;
-                pageImg.loading = "lazy";
-                modalGallery.appendChild(pageImg);
+                if (pageNum === 1) {
+                  page1Thumb.src = pageUrl; // Swap thumbnail with crystal clear vector render
+                } else {
+                  const pageImg = document.createElement("img");
+                  pageImg.src = pageUrl;
+                  pageImg.alt = `${file.name} - Page ${pageNum}`;
+                  modalGallery.appendChild(pageImg);
+                }
               }
-              renderedPdf = true;
-            } catch (err) {
-              console.warn("PDF.js binary fetch failed, mounting bulletproof Full-Document Iframe Reader...", err);
-            }
 
-            // BULLETPROOF FALLBACK: IF STRICT AD-BLOCKER/FIREWALL BLOCKS CANVAS, MOUNT A FULL-DOCUMENT IFRAME
-            if (!renderedPdf) {
-              const iframe = document.createElement("iframe");
-              iframe.src = `https://drive.google.com/file/d/${file.id}/preview`;
-              iframe.title = file.name;
-              iframe.allow = "autoplay";
-              modalGallery.appendChild(iframe);
+              window.PDF_PAGE_CACHE[file.id] = renderedPages;
+            } catch (err) {
+              console.warn("Silent PDF stream render fallback skipped.");
             }
           } else {
             // STANDARD ARCHITECTURAL IMAGE FRAME
@@ -1897,7 +1938,7 @@
             img.loading = "lazy";
             modalGallery.appendChild(img);
           }
-        }
+        });
       }
 
       function closeModal() {
