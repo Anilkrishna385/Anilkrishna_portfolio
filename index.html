@@ -79,7 +79,7 @@
       background-color: #000000;
       border-radius: 50%;
       pointer-events: none;
-      z-index: 100001; /* Updated to sit above modal overlay (10000) */
+      z-index: 100001;
       transform: translate(-50%, -50%);
       transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
     }
@@ -98,7 +98,7 @@
       background: radial-gradient(circle, rgba(160, 160, 160, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
-      z-index: 100000; /* Updated to sit above modal overlay but below cursor dot */
+      z-index: 100000;
       transform: translate(-50%, -50%) scale(0.8);
       animation: puffFade 0.65s ease-out forwards;
     }
@@ -601,7 +601,7 @@
       font-weight: 700;
     }
 
-    /* --- GALLERY SECTION (FIXED CARD GRID) --- */
+    /* --- GALLERY SECTION (FIXED CARD GRID WITH AUTO-SLIDING CROSSFADE) --- */
     .projects-section {
       padding: 4.5rem 8%;
       border-top: 1px solid var(--border-color);
@@ -662,19 +662,26 @@
       overflow: hidden;
       position: relative;
       background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
+    /* Stacked absolute layers for smooth opacity crossfade */
     .project-img-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .project-card:hover .project-img-container img {
+    .project-img-container img.active-slide {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    .project-card:hover .project-img-container img.active-slide {
       transform: scale(1.06);
     }
 
@@ -1270,7 +1277,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
+  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + AUTO-SLIDING CARDS + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1312,14 +1319,24 @@
           // 2. Loop through each folder to build a card
           for (const folder of folderData.files) {
             
-            // Ask Google Drive for just ONE image from this folder to use as the cover
-            const coverUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'&fields=files(id)&pageSize=1&key=${GOOGLE_API_KEY}`;
-            const coverRes = await fetch(coverUrl);
-            const coverData = await coverRes.json();
+            // Ask Google Drive for up to 10 images from this folder for the auto-sliding preview
+            const imagesUrl = `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name)&pageSize=10&key=${GOOGLE_API_KEY}`;
+            const imagesRes = await fetch(imagesUrl);
+            const imagesData = await imagesRes.json();
             
-            let coverImgLink = ""; // Fallback if folder is empty
-            if (coverData.files && coverData.files.length > 0) {
-              coverImgLink = `https://lh3.googleusercontent.com/d/${coverData.files[0].id}`;
+            const fileList = imagesData.files || [];
+            
+            // Build stacked image HTML layers for smooth opacity cross-fading
+            let slidesHtml = "";
+            if (fileList.length > 0) {
+              fileList.forEach((file, idx) => {
+                const activeClass = idx === 0 ? "active-slide" : "";
+                const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
+                slidesHtml += `<img src="${imgUrl}" alt="${folder.name} - slide ${idx + 1}" class="${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
+              });
+            } else {
+              // Fallback if folder is empty
+              slidesHtml = `<img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Fallback Portfolio Image" class="active-slide" style="opacity:0.5;" />`;
             }
 
             // 3. Construct the HTML card
@@ -1331,7 +1348,7 @@
 
             card.innerHTML = `
               <div class="project-img-container">
-                <img src="${coverImgLink}" alt="${folder.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'; this.style.opacity='0.5';"/>
+                ${slidesHtml}
               </div>
               <div class="project-info">
                 <div>
@@ -1343,6 +1360,20 @@
             `;
             
             dynamicGallery.appendChild(card);
+            
+            // 4. Start 3-second auto-sliding crossfade if multiple images exist
+            const slideImgs = card.querySelectorAll(".project-img-container img");
+            if (slideImgs.length > 1) {
+              let currentSlideIdx = 0;
+              // Stagger start slightly by a random offset so cards don't all change simultaneously
+              setTimeout(() => {
+                setInterval(() => {
+                  slideImgs[currentSlideIdx].classList.remove("active-slide");
+                  currentSlideIdx = (currentSlideIdx + 1) % slideImgs.length;
+                  slideImgs[currentSlideIdx].classList.add("active-slide");
+                }, 3000);
+              }, Math.random() * 1500);
+            }
             
             // Re-apply hover listeners for custom cursor on the newly generated cards
             card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
