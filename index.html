@@ -673,7 +673,7 @@
       gap: 2.2rem;
       max-width: 1250px;
       margin: 0 auto;
-      align-items: center;
+      align-items: stretch; /* Keeps row heights balanced and aligned */
     }
 
     /* --- CLASSIC BOX CARD (For Folders with ONLY Images or Direct Image Files) --- */
@@ -687,6 +687,7 @@
       box-shadow: var(--card-shadow);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
+      height: 100%;
     }
 
     .project-card:hover {
@@ -769,16 +770,17 @@
       opacity: 0.6;
     }
 
-    /* --- STANDALONE FROSTED FOLDER ICON (ONLY FOR FOLDERS WITH SUBFOLDERS) --- */
+    /* --- STANDALONE FROSTED FOLDER ICON (FOR FOLDERS WITH SUBFOLDERS) --- */
     .folder-only-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.1rem;
+      gap: 1.6rem;
       cursor: pointer;
       user-select: none;
-      padding: 1rem;
+      padding: 1.8rem 1.2rem;
+      min-height: 420px; /* Matches the total vertical footprint of adjacent .project-card elements */
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -787,18 +789,18 @@
     }
 
     .folder-only-label {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--text-main);
       text-align: center;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
     }
 
-    /* macOS Frosted Glass Folder Icon Graphic (NO BLUE CARD BACKGROUND) */
+    /* macOS Frosted Glass Folder Icon Graphic (PROPER PROPORTIONS: 270px × 202px) */
     .mac-folder {
       position: relative;
-      width: 220px;
-      height: 165px;
+      width: 270px;
+      height: 202px;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -809,25 +811,25 @@
       top: 0;
       left: 0;
       width: 44%;
-      height: 32px;
-      background: rgba(255, 255, 255, 0.82);
+      height: 38px;
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border-radius: 14px 14px 0 0;
+      border-radius: 16px 16px 0 0;
       z-index: 3;
       border: 1.5px solid rgba(0, 0, 0, 0.09);
       border-bottom: none;
     }
 
-    /* Back Layer: Pure Frosted White (No electric blue background) */
+    /* Back Layer: Crisp White Base */
     .folder-back {
       position: absolute;
-      top: 10px;
+      top: 12px;
       right: 0;
       width: 93%;
       height: 90%;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.95);
       border: 1.5px solid rgba(0, 0, 0, 0.08);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       overflow: hidden;
@@ -861,26 +863,26 @@
       transform: translateX(0) scale(1.08);
     }
 
-    /* Front Frosted Pocket (Semi-transparent & Semi-visible overlay) */
+    /* Front Frosted Pocket (Opacity tuned to 0.52 so sliding artwork inside is clearly visible!) */
     .folder-front {
       position: relative;
       width: 100%;
       height: 82%;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 246, 255, 0.58) 100%);
-      backdrop-filter: blur(10px) saturate(160%);
-      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.58) 0%, rgba(240, 246, 255, 0.42) 100%);
+      backdrop-filter: blur(8px) saturate(160%);
+      -webkit-backdrop-filter: blur(8px) saturate(160%);
       border: 1.5px solid rgba(255, 255, 255, 0.95);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
       z-index: 3;
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      padding-bottom: 18px;
+      padding-bottom: 20px;
     }
 
     .folder-handle {
-      width: 36px;
+      width: 40px;
       height: 8px;
       background: rgba(255, 255, 255, 0.95);
       border-radius: 999px;
@@ -890,8 +892,8 @@
     /* 3-Folder Stacked Deck (For Standalone Folders with Multiple Subfolders Inside) */
     .mac-folder-stack {
       position: relative;
-      width: 230px;
-      height: 185px;
+      width: 280px;
+      height: 224px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -899,8 +901,8 @@
 
     .folder-stack-layer {
       position: absolute;
-      width: 210px;
-      height: 155px;
+      width: 260px;
+      height: 190px;
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -932,6 +934,26 @@
 
     .folder-only-item:hover .folder-stack-layer.layer-1 {
       transform: translate(0, 0) scale(1.04);
+    }
+
+    /* Full-Bleed Container for Direct Image Items inside an Opened Folder */
+    .project-img-container.clean-image-mode {
+      padding: 0;
+      background: #f0f0f0;
+    }
+
+    .project-img-container.clean-image-mode img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: relative;
+      transform: none;
+      opacity: 1;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .project-card:hover .project-img-container.clean-image-mode img {
+      transform: scale(1.06);
     }
 
     /* --- FULLSCREEN IMAGE LIGHTBOX MODAL --- */
@@ -1464,7 +1486,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v8";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v9";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
