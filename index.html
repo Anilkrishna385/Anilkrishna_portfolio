@@ -601,7 +601,7 @@
       font-weight: 700;
     }
 
-    /* --- GALLERY SECTION (FIXED CARD GRID WITH AUTO-SLIDING CROSSFADE) --- */
+    /* --- GALLERY SECTION (RANDOMIZED HORIZONTAL SLIDING TRANSITION) --- */
     .projects-section {
       padding: 4.5rem 8%;
       border-top: 1px solid var(--border-color);
@@ -664,7 +664,7 @@
       background: #f0f0f0;
     }
 
-    /* Stacked absolute layers for smooth opacity crossfade */
+    /* Horizontal Sliding Animation Engine */
     .project-img-container img {
       position: absolute;
       top: 0;
@@ -672,17 +672,26 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0;
-      transition: opacity 0.8s ease-in-out, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateX(100%);
+      transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
     }
 
+    /* Currently visible slide */
     .project-img-container img.active-slide {
-      opacity: 1;
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    /* Slide leaving to the left */
+    .project-img-container img.exit-slide {
+      transform: translateX(-100%);
       z-index: 1;
     }
 
+    /* Subtle zoom on hover for the active slide */
     .project-card:hover .project-img-container img.active-slide {
-      transform: scale(1.06);
+      transform: translateX(0) scale(1.06);
     }
 
     .project-info {
@@ -1277,7 +1286,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + AUTO-SLIDING CARDS + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
+  <!-- SCRIPT: LIVE GOOGLE DRIVE FETCH + RANDOMIZED SLIDING CARDS + SEGMENTED CAPSULE SLIDER + SOLID DOT CURSOR -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1295,6 +1304,9 @@
       const modalMeta = document.getElementById("modalMeta");
       const modalDescription = document.getElementById("modalDescription");
       const modalGallery = document.getElementById("modalGallery");
+
+      // Array to keep track of cards that have multiple images for randomized sliding
+      const multiImageCards = [];
 
       // Initialize the automated gallery on page load
       async function buildGallery() {
@@ -1326,7 +1338,7 @@
             
             const fileList = imagesData.files || [];
             
-            // Build stacked image HTML layers for smooth opacity cross-fading
+            // Build stacked image HTML layers for horizontal sliding transitions
             let slidesHtml = "";
             if (fileList.length > 0) {
               fileList.forEach((file, idx) => {
@@ -1336,7 +1348,7 @@
               });
             } else {
               // Fallback if folder is empty
-              slidesHtml = `<img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Fallback Portfolio Image" class="active-slide" style="opacity:0.5;" />`;
+              slidesHtml = `<img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Fallback Portfolio Image" class="active-slide" />`;
             }
 
             // 3. Construct the HTML card
@@ -1361,28 +1373,69 @@
             
             dynamicGallery.appendChild(card);
             
-            // 4. Start 3-second auto-sliding crossfade if multiple images exist
+            // If the card has more than 1 image, register it for randomized sliding
             const slideImgs = card.querySelectorAll(".project-img-container img");
             if (slideImgs.length > 1) {
-              let currentSlideIdx = 0;
-              // Stagger start slightly by a random offset so cards don't all change simultaneously
-              setTimeout(() => {
-                setInterval(() => {
-                  slideImgs[currentSlideIdx].classList.remove("active-slide");
-                  currentSlideIdx = (currentSlideIdx + 1) % slideImgs.length;
-                  slideImgs[currentSlideIdx].classList.add("active-slide");
-                }, 3000);
-              }, Math.random() * 1500);
+              multiImageCards.push({
+                card: card,
+                slides: slideImgs,
+                currentIdx: 0,
+                isSliding: false
+              });
             }
             
             // Re-apply hover listeners for custom cursor on the newly generated cards
             card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
             card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
           }
+
+          // 4. Start the randomized slide ticker once all cards are built
+          startRandomSlideTicker();
         } catch (error) {
           console.error("Error building gallery:", error);
           dynamicGallery.innerHTML = "<p style='color: var(--text-muted); text-align: center; width: 100%;'>Error connecting to Google Drive. Check permissions and API Key.</p>";
         }
+      }
+
+      // Automatically triggers a horizontal slide on a random card in the gallery
+      function slideNextImage(cardData) {
+        if (cardData.isSliding || cardData.slides.length <= 1) return;
+        cardData.isSliding = true;
+
+        const slides = cardData.slides;
+        const currentSlide = slides[cardData.currentIdx];
+        const nextIdx = (cardData.currentIdx + 1) % slides.length;
+        const nextSlide = slides[nextIdx];
+
+        // Activate slide-out to left for old image and slide-in from right for new image
+        currentSlide.classList.remove("active-slide");
+        currentSlide.classList.add("exit-slide");
+        nextSlide.classList.add("active-slide");
+
+        cardData.currentIdx = nextIdx;
+
+        // After the 750ms slide transition finishes, reset the exited slide back to right
+        setTimeout(() => {
+          currentSlide.classList.remove("exit-slide");
+          cardData.isSliding = false;
+        }, 800);
+      }
+
+      // Organic randomized ticker: picks random cards instead of sequential orders
+      function startRandomSlideTicker() {
+        if (multiImageCards.length === 0) return;
+
+        function triggerOrganicSlide() {
+          const randomIndex = Math.floor(Math.random() * multiImageCards.length);
+          const selectedCard = multiImageCards[randomIndex];
+          slideNextImage(selectedCard);
+
+          // Randomize the wait interval between 2.5s and 3.5s for natural timing
+          const randomDelay = Math.floor(Math.random() * 1000) + 2500;
+          setTimeout(triggerOrganicSlide, randomDelay);
+        }
+
+        setTimeout(triggerOrganicSlide, 2000);
       }
 
       // Open the modal and fetch all images for the clicked folder
