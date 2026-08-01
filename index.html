@@ -45,9 +45,9 @@
 
     /* Hide default mouse cursor on desktop to use custom black dot */
     @media (pointer: fine) {
-      body, a, button, .exp-card, .software-item, .project-card, .modal-close-btn,
-      .project-modal-overlay, .project-modal-content, .modal-stacked-gallery img,
-      .gallery-back-btn {
+      body, a, button, .exp-card, .software-item, .project-card, .folder-only-item,
+      .modal-close-btn, .project-modal-overlay, .project-modal-content,
+      .modal-stacked-gallery img, .gallery-back-btn {
         cursor: none !important;
       }
     }
@@ -666,14 +666,17 @@
       font-size: 0.95rem;
     }
 
+    /* Unified Grid for Box Cards and Standalone Folder Icons */
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 2.2rem;
       max-width: 1250px;
       margin: 0 auto;
+      align-items: center;
     }
 
+    /* --- CLASSIC BOX CARD (For Folders with ONLY Images or Direct Image Files) --- */
     .project-card {
       background: var(--bg-main);
       border: 1px solid var(--border-color);
@@ -691,64 +694,15 @@
       box-shadow: var(--card-shadow-hover);
     }
 
-    /* Padded Canvas for the Frosted Glass Folder Icon */
     .project-img-container {
       width: 100%;
       height: 300px;
       overflow: hidden;
       position: relative;
-      background: #f4f6f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
+      background: #f0f0f0;
     }
 
-    /* --- macOS FROSTED GLASS FOLDER ICON (NO ELECTRIC BLUE CARD) --- */
-    .mac-folder {
-      position: relative;
-      width: 100%;
-      max-width: 220px;
-      height: 165px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      user-select: none;
-    }
-
-    /* Top Left Frosted Folder Tab */
-    .folder-tab {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 44%;
-      height: 32px;
-      background: rgba(255, 255, 255, 0.78);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-radius: 14px 14px 0 0;
-      z-index: 3;
-      border: 1.5px solid rgba(255, 255, 255, 0.9);
-      border-bottom: none;
-    }
-
-    /* Back Card: Pure Frosted White/Transparent (No blue #1668ff background!) */
-    .folder-back {
-      position: absolute;
-      top: 10px;
-      right: 0;
-      width: 93%;
-      height: 90%;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
-      z-index: 1;
-    }
-
-    /* Sliding Cover Images inside the Folder Back (Semi-transparent through front glass) */
-    .folder-back img.slide-img {
+    .project-img-container img.slide-img {
       position: absolute;
       top: 0;
       left: 0;
@@ -760,115 +714,18 @@
       will-change: transform;
     }
 
-    .folder-back img.slide-img.active-slide {
+    .project-img-container img.slide-img.active-slide {
       transform: translateX(0);
       z-index: 2;
     }
 
-    .folder-back img.slide-img.exit-slide {
+    .project-img-container img.slide-img.exit-slide {
       transform: translateX(-100%);
       z-index: 1;
     }
 
-    .project-card:hover .folder-back img.slide-img.active-slide {
-      transform: translateX(0) scale(1.08);
-    }
-
-    /* Front Frosted Glass Pocket (Semi-transparent & Semi-visible overlay) */
-    .folder-front {
-      position: relative;
-      width: 100%;
-      height: 82%;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(240, 246, 255, 0.55) 100%);
-      backdrop-filter: blur(10px) saturate(160%);
-      -webkit-backdrop-filter: blur(10px) saturate(160%);
-      border: 1.5px solid rgba(255, 255, 255, 0.92);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-      z-index: 3;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 18px;
-    }
-
-    /* Bottom Center White Capsule Handle */
-    .folder-handle {
-      width: 36px;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 999px;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
-    }
-
-    /* --- 3-FOLDER STACKED DECK (When Folder contains Multiple Subfolders) --- */
-    .mac-folder-stack {
-      position: relative;
-      width: 100%;
-      max-width: 230px;
-      height: 185px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-
-    .folder-stack-layer {
-      position: absolute;
-      width: 210px;
-      height: 155px;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* 3 Fanned Layers arranged cleanly behind one another */
-    .folder-stack-layer.layer-3 {
-      transform: translate(16px, -16px) scale(0.9);
-      opacity: 0.45;
-      z-index: 1;
-    }
-
-    .folder-stack-layer.layer-2 {
-      transform: translate(8px, -8px) scale(0.95);
-      opacity: 0.75;
-      z-index: 2;
-    }
-
-    .folder-stack-layer.layer-1 {
-      transform: translate(0, 0) scale(1);
-      opacity: 1;
-      z-index: 3;
-    }
-
-    .project-card:hover .folder-stack-layer.layer-3 {
-      transform: translate(22px, -20px) scale(0.9);
-    }
-
-    .project-card:hover .folder-stack-layer.layer-2 {
-      transform: translate(11px, -10px) scale(0.95);
-    }
-
-    .project-card:hover .folder-stack-layer.layer-1 {
-      transform: translate(0, 0) scale(1.03);
-    }
-
-    /* Full-Bleed Container for Direct Image Items inside an Opened Folder */
-    .project-img-container.clean-image-mode {
-      padding: 0;
-      background: #f0f0f0;
-    }
-
-    .project-img-container.clean-image-mode img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: relative;
-      transform: none;
-      opacity: 1;
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .project-card:hover .project-img-container.clean-image-mode img {
-      transform: scale(1.06);
+    .project-card:hover .project-img-container img.slide-img.active-slide {
+      transform: translateX(0) scale(1.06);
     }
 
     .project-info {
@@ -910,6 +767,171 @@
 
     .project-card:hover .project-link {
       opacity: 0.6;
+    }
+
+    /* --- STANDALONE FROSTED FOLDER ICON (ONLY FOR FOLDERS WITH SUBFOLDERS) --- */
+    .folder-only-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.1rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 1rem;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .folder-only-item:hover {
+      transform: translateY(-8px);
+    }
+
+    .folder-only-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    /* macOS Frosted Glass Folder Icon Graphic (NO BLUE CARD BACKGROUND) */
+    .mac-folder {
+      position: relative;
+      width: 220px;
+      height: 165px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .folder-tab {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 44%;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 14px 14px 0 0;
+      z-index: 3;
+      border: 1.5px solid rgba(0, 0, 0, 0.09);
+      border-bottom: none;
+    }
+
+    /* Back Layer: Pure Frosted White (No electric blue background) */
+    .folder-back {
+      position: absolute;
+      top: 10px;
+      right: 0;
+      width: 93%;
+      height: 90%;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* Sliding Cover Images inside Folder Back */
+    .folder-back img.slide-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateX(100%);
+      transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+
+    .folder-back img.slide-img.active-slide {
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    .folder-back img.slide-img.exit-slide {
+      transform: translateX(-100%);
+      z-index: 1;
+    }
+
+    .folder-only-item:hover .folder-back img.slide-img.active-slide {
+      transform: translateX(0) scale(1.08);
+    }
+
+    /* Front Frosted Pocket (Semi-transparent & Semi-visible overlay) */
+    .folder-front {
+      position: relative;
+      width: 100%;
+      height: 82%;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(240, 246, 255, 0.58) 100%);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+      z-index: 3;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 18px;
+    }
+
+    .folder-handle {
+      width: 36px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 999px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    /* 3-Folder Stacked Deck (For Standalone Folders with Multiple Subfolders Inside) */
+    .mac-folder-stack {
+      position: relative;
+      width: 230px;
+      height: 185px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .folder-stack-layer {
+      position: absolute;
+      width: 210px;
+      height: 155px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .folder-stack-layer.layer-3 {
+      transform: translate(16px, -16px) scale(0.9);
+      opacity: 0.45;
+      z-index: 1;
+    }
+
+    .folder-stack-layer.layer-2 {
+      transform: translate(8px, -8px) scale(0.95);
+      opacity: 0.75;
+      z-index: 2;
+    }
+
+    .folder-stack-layer.layer-1 {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+      z-index: 3;
+    }
+
+    .folder-only-item:hover .folder-stack-layer.layer-3 {
+      transform: translate(22px, -20px) scale(0.9);
+    }
+
+    .folder-only-item:hover .folder-stack-layer.layer-2 {
+      transform: translate(11px, -10px) scale(0.95);
+    }
+
+    .folder-only-item:hover .folder-stack-layer.layer-1 {
+      transform: translate(0, 0) scale(1.04);
     }
 
     /* --- FULLSCREEN IMAGE LIGHTBOX MODAL --- */
@@ -1431,7 +1453,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: IN-PLACE DRILL-DOWN GALLERY + CONDITIONAL 3-FOLDER DECK + INSTANT CACHE -->
+  <!-- SCRIPT: RULE-BASED FOLDER vs CARD RENDERING + IN-PLACE DRILL-DOWN + INSTANT CACHE -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // ==========================================
@@ -1442,7 +1464,7 @@
       // MASTER "WEBSITE GALLERY" FOLDER ID:
       const MASTER_FOLDER_ID = "1DtaonLw2SdWmhbNoc8J_7ZdOHH0GfhdY"; 
 
-      const CACHE_KEY = "anil_portfolio_tree_cache_v7";
+      const CACHE_KEY = "anil_portfolio_tree_cache_v8";
       const dynamicGallery = document.getElementById("dynamicGallery");
       const galleryTitle = document.getElementById("galleryTitle");
       const gallerySubtitle = document.getElementById("gallerySubtitle");
@@ -1527,7 +1549,7 @@
         return results.filter(item => item !== null);
       }
 
-      // Main inline gallery render function: renders either top-level folders (root) OR folder contents
+      // Main inline gallery render function
       function renderGalleryView(folderNode = null) {
         dynamicGallery.innerHTML = "";
         multiImageCards = [];
@@ -1551,10 +1573,11 @@
           return;
         }
 
-        // 2. Render Subfolders as Frosted Glass Folder Cards
+        // 2. Render Folders conditionally based on rule: ONLY IMAGES = Box Card, HAS SUBFOLDERS = Standalone Folder Icon
         subfoldersToRender.forEach((subfolder) => {
           const coverList = subfolder.coverImages || [];
-          const hasMultipleFolders = subfolder.subfolders && subfolder.subfolders.length > 1;
+          const hasSubfolders = subfolder.subfolders && subfolder.subfolders.length > 0;
+          const hasMultipleSubfolders = subfolder.subfolders && subfolder.subfolders.length > 1;
           
           let slidesHtml = "";
           coverList.forEach((file, idx) => {
@@ -1563,85 +1586,113 @@
             slidesHtml += `<img src="${imgUrl}" alt="${subfolder.name} - slide ${idx + 1}" class="slide-img ${activeClass}" loading="lazy" onerror="this.style.display='none';"/>`;
           });
 
-          const card = document.createElement("div");
-          card.className = "project-card";
-          card.onclick = () => openInlineFolder(subfolder);
+          if (hasSubfolders) {
+            // RULE 2: HAS SUBFOLDERS -> Show ONLY the Frosted Glass Folder Icon (No Box Card wrapper!)
+            const folderElem = document.createElement("div");
+            folderElem.className = "folder-only-item";
+            folderElem.onclick = () => openInlineFolder(subfolder);
 
-          let folderIconHtml = "";
-          if (hasMultipleFolders) {
-            // Render 3 stacked frosted folders if multiple folders exist inside
-            folderIconHtml = `
-              <div class="mac-folder-stack">
-                <div class="folder-stack-layer layer-3">
-                  <div class="mac-folder">
-                    <div class="folder-tab"></div>
-                    <div class="folder-back"></div>
-                    <div class="folder-front"></div>
+            let folderIconHtml = "";
+            if (hasMultipleSubfolders) {
+              // 3-Folder Stacked Deck
+              folderIconHtml = `
+                <div class="mac-folder-stack">
+                  <div class="folder-stack-layer layer-3">
+                    <div class="mac-folder">
+                      <div class="folder-tab"></div>
+                      <div class="folder-back"></div>
+                      <div class="folder-front"></div>
+                    </div>
                   </div>
-                </div>
-                <div class="folder-stack-layer layer-2">
-                  <div class="mac-folder">
-                    <div class="folder-tab"></div>
-                    <div class="folder-back"></div>
-                    <div class="folder-front"></div>
+                  <div class="folder-stack-layer layer-2">
+                    <div class="mac-folder">
+                      <div class="folder-tab"></div>
+                      <div class="folder-back"></div>
+                      <div class="folder-front"></div>
+                    </div>
                   </div>
-                </div>
-                <div class="folder-stack-layer layer-1">
-                  <div class="mac-folder">
-                    <div class="folder-tab"></div>
-                    <div class="folder-back">${slidesHtml}</div>
-                    <div class="folder-front">
-                      <div class="folder-handle"></div>
+                  <div class="folder-stack-layer layer-1">
+                    <div class="mac-folder">
+                      <div class="folder-tab"></div>
+                      <div class="folder-back">${slidesHtml}</div>
+                      <div class="folder-front">
+                        <div class="folder-handle"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            `;
-          } else {
-            // Render single frosted folder if only 0 or 1 subfolder exists inside
-            folderIconHtml = `
-              <div class="mac-folder">
-                <div class="folder-tab"></div>
-                <div class="folder-back">
-                  ${slidesHtml}
+              `;
+            } else {
+              // Single Frosted Folder
+              folderIconHtml = `
+                <div class="mac-folder">
+                  <div class="folder-tab"></div>
+                  <div class="folder-back">
+                    ${slidesHtml}
+                  </div>
+                  <div class="folder-front">
+                    <div class="folder-handle"></div>
+                  </div>
                 </div>
-                <div class="folder-front">
-                  <div class="folder-handle"></div>
-                </div>
-              </div>
-            `;
-          }
+              `;
+            }
 
-          card.innerHTML = `
-            <div class="project-img-container">
+            folderElem.innerHTML = `
               ${folderIconHtml}
-            </div>
-            <div class="project-info">
-              <div>
-                <span class="project-meta">@anilkrishna · Interior Designer</span>
-                <h3 class="project-title">${subfolder.name}</h3>
+              <span class="folder-only-label">${subfolder.name}</span>
+            `;
+
+            dynamicGallery.appendChild(folderElem);
+
+            const slideImgs = folderElem.querySelectorAll("img.slide-img");
+            if (slideImgs.length > 1) {
+              multiImageCards.push({
+                card: folderElem,
+                slides: slideImgs,
+                currentIdx: 0,
+                isSliding: false
+              });
+            }
+
+            folderElem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+            folderElem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+          } else {
+            // RULE 1: ONLY IMAGES (No Subfolders) -> Show Classic Box Card with Sliding Feature
+            const card = document.createElement("div");
+            card.className = "project-card";
+            card.onclick = () => openInlineFolder(subfolder);
+
+            card.innerHTML = `
+              <div class="project-img-container">
+                ${slidesHtml}
               </div>
-              <span class="project-link">VIEW PROJECT →</span>
-            </div>
-          `;
-          
-          dynamicGallery.appendChild(card);
-          
-          const slideImgs = card.querySelectorAll("img.slide-img");
-          if (slideImgs.length > 1) {
-            multiImageCards.push({
-              card: card,
-              slides: slideImgs,
-              currentIdx: 0,
-              isSliding: false
-            });
+              <div class="project-info">
+                <div>
+                  <span class="project-meta">@anilkrishna · Interior Designer</span>
+                  <h3 class="project-title">${subfolder.name}</h3>
+                </div>
+                <span class="project-link">VIEW PROJECT →</span>
+              </div>
+            `;
+            
+            dynamicGallery.appendChild(card);
+            
+            const slideImgs = card.querySelectorAll("img.slide-img");
+            if (slideImgs.length > 1) {
+              multiImageCards.push({
+                card: card,
+                slides: slideImgs,
+                currentIdx: 0,
+                isSliding: false
+              });
+            }
+            
+            card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+            card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
           }
-          
-          card.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
-          card.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
         });
 
-        // 3. Render Direct Images inside this folder as crisp Image Cards
+        // 3. Render Direct Images inside this folder as crisp Box Cards
         imagesToRender.forEach((file) => {
           const imgUrl = `https://lh3.googleusercontent.com/d/${file.id}`;
           const card = document.createElement("div");
@@ -1912,7 +1963,7 @@
       }
 
       // Add hover scale class on links & interactive elements
-      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .modal-close-btn, .gallery-back-btn");
+      const interactiveElements = document.querySelectorAll("a, button, .exp-card, .software-item, .project-card, .folder-only-item, .modal-close-btn, .gallery-back-btn");
       interactiveElements.forEach(elem => {
         elem.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
         elem.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
